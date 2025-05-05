@@ -12,7 +12,7 @@ export default function Login() {
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         login({ email });
-        navigate("/dashboard");
+        navigate("/");
     };
 
     return (

@@ -1,21 +1,41 @@
 import './index.css'
 
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 
-import Home from './pages/home';
+// import Home from './pages/home';
 import Login from './pages/auth/login';
 import NotFound from './pages/not-found';
 import Register from './pages/auth/register';
+
 import Dashboard from './pages/dashboard/dashboard';
+import Layout from './components/layout';
+import Sequence from './pages/outreach/sequence';
+import Outbox from './pages/outreach/outbox';
+import Lists from './pages/outreach/lists';
+import Templates from './pages/outreach/templates';
+import OutreachLayout from './pages/outreach/layout';
 
 import { AuthProvider } from './contexts/auth-context';
-import ProtectedRoute from './components/protected-route';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />, // ← This guide page
+    element: <Layout />,
+    children: [
+      { index: true, element: <Dashboard /> },
+      {
+        path: 'outreach',
+        element: <OutreachLayout />,
+        children: [
+          { index: true, element: <Navigate to="sequence" replace /> },
+          { path: 'lists', element: <Lists /> },
+          { path: 'outbox', element: <Outbox /> },
+          { path: 'sequence', element: <Sequence /> },
+          { path: 'templates', element: <Templates /> },
+        ]
+      },
+    ],
   },
   {
     path: "/login",
@@ -24,10 +44,6 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
-  },
-  {
-    path: "/dashboard",
-    element: <ProtectedRoute><Dashboard /></ProtectedRoute>,
   },
   {
     path: "*",

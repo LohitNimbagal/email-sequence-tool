@@ -8,7 +8,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export default function Button({ children, className, variant = "primary", ...props }: Props) {
 
-    const base = "px-4 py-2 rounded font-medium transition";
+    const base = "px-4 py-2 rounded font-medium transition flex items-center gap-2";
     const variants = {
         primary: "bg-blue-600 text-white hover:bg-blue-700",
         secondary: "bg-gray-600 text-white hover:bg-gray-700",
