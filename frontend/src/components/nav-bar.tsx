@@ -1,97 +1,109 @@
-
 import { useState } from 'react'
-import { X, AlignJustify } from 'lucide-react'
+import { AlignJustify, X, User, Lightbulb } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem
+} from '@/components/ui/dropdown-menu'
+import { Link } from '@tanstack/react-router'
 
 const navItems = [
     { name: 'Dashboard', href: '/', key: 'dashboard' },
-    { name: 'Outreach', href: '/outreach', key: 'outreach' },
+    { name: 'Outreach', href: '/outreach', key: 'outreach' }
 ]
-
-function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ')
-}
 
 export default function Navbar() {
 
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const [activeNav, setActiveNav] = useState('dashboard')
+    const [mobileOpen, setMobileOpen] = useState(false)
+    // const navigate = useNavigate()
 
-    const handleNavClick = (key: string) => {
-        setActiveNav(key)
-        setMobileMenuOpen(false)
-    }
+    // const handleLogout = () => {
+    //     console.log('Logging out...')
+    //     // perform logout logic
+    //     navigate('/login')
+    // }
 
     return (
-        <nav className="bg-white border-b border-gray-200">
+        <header className="bg-white border-b border-muted-200 shadow-sm">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="relative flex h-16 items-center justify-between">
+                <div className="flex h-16 items-center justify-between">
 
-                    {/* Mobile menu button */}
-                    <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-none"
-                        >
-                            {mobileMenuOpen ? <X className="w-6 h-6" /> : <AlignJustify className="w-6 h-6" />}
-                        </button>
+                    {/* Left: Logo & Nav */}
+                    <div className="flex items-center space-x-2">
+                        <Lightbulb className="w-6 h-6 text-primary" />
+                        <nav className="hidden sm:flex items-center space-x-4">
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.key}
+                                    to={item.href}
+                                    className="[&.active]:font-bold"
+                                // className={({ isActive }) =>
+                                //     `px-3 py-2 text-sm font-medium transition-all duration-200 ${isActive
+                                //         ? 'text-sidebar-primary bg-sidebar-primary-foreground rounded-md' // More prominent active state
+                                //         : 'text-muted-foreground hover:text-primary'
+                                //     }`
+                                // }
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+                        </nav>
                     </div>
 
-                    {/* Logo and Desktop Nav */}
-                    <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                        <div className="flex shrink-0 items-center">
-                            <img
-                                className="h-6 w-auto"
-                                src="https://unicorn-images.b-cdn.net/147c28c6-09fa-4aaf-8493-f6e98c1a6d17"
-                                alt="Your Company"
-                            />
+                    {/* Right: Mobile toggle & User */}
+                    <div className="flex items-center space-x-2">
+                        <div className="sm:hidden">
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setMobileOpen(!mobileOpen)}
+                            >
+                                {mobileOpen ? <X className="w-5 h-5 text-muted" /> : <AlignJustify className="w-5 h-5 text-muted" />}
+                            </Button>
                         </div>
-                        <div className="hidden sm:ml-6 sm:block">
-                            <div className="flex space-x-4">
-                                {navItems.map((item) => (
-                                    <a
-                                        key={item.key}
-                                        href={item.href}
-                                        onClick={() => handleNavClick(item.key)}
-                                        className={classNames(
-                                            activeNav === item.key
-                                                ? 'bg-gray-100 text-gray-900'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-                                            'rounded-md px-3 py-2 text-sm font-medium'
-                                        )}
-                                        aria-current={activeNav === item.key ? 'page' : undefined}
-                                    >
-                                        {item.name}
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full border border-muted-300"
+                                >
+                                    <User className="w-5 h-5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem >Logout</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>
 
             {/* Mobile menu */}
-            {mobileMenuOpen && (
-                <div className="sm:hidden">
-                    <div className="space-y-1 px-2 pt-2 pb-3">
-                        {navItems.map((item) => (
-                            <a
-                                key={item.key}
-                                href={item.href}
-                                onClick={() => handleNavClick(item.key)}
-                                className={classNames(
-                                    activeNav === item.key
-                                        ? 'bg-gray-100 text-gray-900'
-                                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-                                    'block rounded-md px-3 py-2 text-base font-medium'
-                                )}
-                                aria-current={activeNav === item.href ? 'page' : undefined}
-                            >
-                                {item.name}
-                            </a>
-                        ))}
-                    </div>
+            {mobileOpen && (
+                <div className="sm:hidden px-4 pb-4 pt-2 space-y-1">
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.key}
+                            to={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="[&.active]:font-bold"
+                        // className={({ isActive }) =>
+                        //     `block px-3 py-2 text-sm font-medium transition-all duration-200 ${isActive
+                        //         ? 'text-primary bg-muted-200 rounded-md'
+                        //         : ' hover:text-primary'
+                        //     }`
+                        // }
+                        >
+                            {item.name}
+                        </Link>
+                    ))}
                 </div>
             )}
-        </nav>
+        </header>
     )
 }
