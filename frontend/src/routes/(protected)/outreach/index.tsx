@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect } from "react"
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useState } from "react"
 import {
   Table,
   TableBody,
@@ -18,82 +18,45 @@ import {
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
+import { createSequence, sequencesQueryOptions, type Sequence } from '@/services/sequence'
 
-interface Sequence {
-  _id: string;
-  name: string;
-  status?: string;
-  scheduleTime?: string;
-}
 
 export const Route = createFileRoute('/(protected)/outreach/')({
+  loader: ({ context: { queryClient } }) => {
+    return queryClient.ensureQueryData(sequencesQueryOptions)
+  },
   component: Sequence,
 })
 
 function Sequence() {
 
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const sequencesQuery = useSuspenseQuery(sequencesQueryOptions)
+
+  const sequences = sequencesQuery.data as Sequence[]
+
   const [open, setOpen] = useState(false)
   const [sequenceName, setSequenceName] = useState("")
-  const [sequences, setSequences] = useState<Sequence[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    const fetchSequences = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/sequences', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch sequences');
-        }
-
-        const data: Sequence[] = await response.json();
-        setSequences(data);
-      } catch (error) {
-        console.error('Error fetching sequences:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSequences();
-  }, []);
-
-  const handleCreateSequence = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    try {
-      const response = await fetch('http://localhost:8080/sequences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add your auth token here if required
-        },
-        credentials: 'include',
-        body: JSON.stringify({ name: sequenceName })
-      });
-
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error('Failed to create sequence');
-      }
-
-      // Reset form and close dialog
+  const createSequenceMutation = useMutation({
+    mutationFn: createSequence,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['sequences'] }) // Refetch sequences
+      navigate({ to: '/outreach/sequences/$sequenceId', params: { sequenceId: data._id } })
       setSequenceName("")
       setOpen(false)
-    } catch (error) {
-      console.error('Error creating sequence:', error)
-      // Add error handling (e.g., show toast notification)
-    } finally {
-      setLoading(false)
-    }
+    },
+    onError: (error) => {
+      console.error("Error creating sequence:", error)
+    },
+  })
+
+  const handleCreateSequence = (e: React.FormEvent) => {
+    e.preventDefault()
+    createSequenceMutation.mutate(sequenceName)
   }
 
   return (
@@ -107,21 +70,7 @@ function Sequence() {
         </div>
         <Button onClick={() => setOpen(true)}>
           <span>Create New Sequence</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="ml-2"
-          >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
+          <Plus className="w-4 h-4 ml-2" />
         </Button>
       </div>
 
@@ -132,17 +81,18 @@ function Sequence() {
           </DialogHeader>
           <form className="space-y-4" onSubmit={handleCreateSequence}>
             <div>
-              <Label className="block mb-2 text-sm font-medium text-gray-900">
+              <Label htmlFor="sequenceName" className="block mb-2 text-sm font-medium text-gray-900">
                 Sequence Name
               </Label>
               <Input
+                id="sequenceName"
                 type="text"
                 value={sequenceName}
                 onChange={(e) => setSequenceName(e.target.value)}
                 className="w-full p-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter sequence name"
                 required
-                disabled={loading}
+                disabled={createSequenceMutation.isPending}
               />
             </div>
 
@@ -151,12 +101,12 @@ function Sequence() {
                 type="button"
                 variant="secondary"
                 onClick={() => setOpen(false)}
-                disabled={loading}
+                disabled={createSequenceMutation.isPending}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create"}
+              <Button type="submit" disabled={createSequenceMutation.isPending || !sequenceName.trim()}>
+                {createSequenceMutation.isPending ? "Creating..." : "Create"}
               </Button>
             </div>
           </form>
@@ -174,11 +124,7 @@ function Sequence() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center">Loading sequences...</TableCell>
-            </TableRow>
-          ) : sequences.length === 0 ? (
+          {sequences.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center">No sequences found</TableCell>
             </TableRow>
@@ -187,7 +133,7 @@ function Sequence() {
               <TableRow key={seq._id}>
                 <TableCell className="font-medium">
                   <Link
-                    to={`/outreach/sequences/$sequenceId`}
+                    to="/outreach/sequences/$sequenceId"
                     params={{ sequenceId: seq._id }}
                   >
                     {seq.name}
@@ -196,7 +142,16 @@ function Sequence() {
                 <TableCell>{seq.status ?? "-"}</TableCell>
                 <TableCell>{seq.scheduleTime ?? "-"}</TableCell>
                 <TableCell className="text-right">
-                  <a href="#" className="text-blue-600 hover:underline">Edit</a>
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-blue-600 hover:text-blue-800"
+                    onClick={() => navigate({
+                      to: '/outreach/sequences/$sequenceId',
+                      params: { sequenceId: seq._id }
+                    })}
+                  >
+                    Edit
+                  </Button>
                 </TableCell>
               </TableRow>
             ))
