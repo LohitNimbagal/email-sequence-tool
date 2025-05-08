@@ -19,9 +19,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Check, Mail } from 'lucide-react';
+import { Check, Mail, Plus } from 'lucide-react';
 
 export function AddBlockNode() {
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [step, setStep] = useState(1);
     const [selectedBlock, setSelectedBlock] = useState<"cold-email" | null>(null);
@@ -84,40 +85,39 @@ export function AddBlockNode() {
                 );
             }
 
-            const newEdges = reactFlow.getEdges().filter(edge => edge.id !== 'default-edge-to-add');
+            // Get all existing edges and remove any targeting 'add-block'
+            const cleanedEdges = reactFlow.getEdges().filter(edge =>
+                edge.target !== 'add-block' && edge.target !== newblockNode.id
+            );
 
-            // If it's the first block, connect start -> new block
-            if (blockNodes.length === 0) {
-                newEdges.push({
-                    id: `edge-start-${Date.now()}`,
-                    source: '1',
-                    target: newblockNode.id,
-                    type: 'default',
-                });
-            } else {
-                // Otherwise, connect previous block -> new block
-                const previousBlock = blockNodes.reduce((max, node) =>
-                    node.position.y > max.position.y ? node : max, blockNodes[0]);
-
-                newEdges.push({
-                    id: `edge-block-${Date.now()}`,
-                    source: previousBlock.id,
-                    target: newblockNode.id,
-                    type: 'default',
-                });
+            // Determine which block to connect from
+            let previousBlockId = '1'; // default to start
+            if (blockNodes.length > 0) {
+                const latestBlock = blockNodes.reduce((latest, node) =>
+                    node.position.y > latest.position.y ? node : latest, blockNodes[0]);
+                previousBlockId = latestBlock.id;
             }
 
-            // Connect new block -> addBlockNode
+            // Add edge from previous block to the new one
+            cleanedEdges.push({
+                id: `edge-${previousBlockId}-${newblockNode.id}`,
+                source: previousBlockId,
+                target: newblockNode.id,
+                type: 'default',
+            });
+
+            // Add edge from new block to 'add-block' if it exists
             if (addBlockNode) {
-                newEdges.push({
-                    id: `edge-to-add-${Date.now()}`,
+                cleanedEdges.push({
+                    id: `edge-${newblockNode.id}-add-block`,
                     source: newblockNode.id,
                     target: addBlockNode.id,
                     type: 'default',
                 });
             }
 
-            reactFlow.setEdges(newEdges);
+            // Update edges
+            reactFlow.setEdges(cleanedEdges);
 
             setStep(1);
             setSelectedBlock(null);
@@ -132,18 +132,7 @@ export function AddBlockNode() {
                 className="flex items-center justify-center w-10 h-10 rounded-sm bg-gray-100"
                 onClick={() => setIsDialogOpen(true)}
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24" height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M12 5v14M5 12h14" />
-                </svg>
+                <Plus className='w-6 h-6 text-blue-500' />
             </div>
 
             <Handle type="target" position={Position.Top} id="a" />

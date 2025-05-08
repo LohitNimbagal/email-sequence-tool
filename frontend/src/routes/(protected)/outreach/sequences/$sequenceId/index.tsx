@@ -18,11 +18,10 @@ export const Route = createFileRoute('/(protected)/outreach/sequences/$sequenceI
 function RouteComponent() {
 
   const sequenceId = Route.useParams().sequenceId
-  const { data: sequenceArray, isLoading } = useSuspenseQuery(sequenceQueryOptions(sequenceId))
-  const sequence = sequenceArray[0]
+  const { data: sequence, isLoading } = useSuspenseQuery(sequenceQueryOptions(sequenceId))
 
   if (isLoading) {
-    <div>Loading.....</div>
+    return <div>Loading.....</div>
   }
 
   return (
