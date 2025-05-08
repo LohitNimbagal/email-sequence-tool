@@ -4,17 +4,15 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useState, useCallback, type CSSProperties } from 'react';
-import { SourceNode } from './source-node';
-import { AddSourceNode } from './add-source-node';
-import { AddBlockNode } from './add-block';
-import { BlockNode } from './block-node';
+import { UnifiedSourceNode } from './unified-source-node';
+import { UnifiedBlockNode } from './unified-block-node';
 
-// Define node types
+
+
+// Define node types with unified components
 const nodeTypes = {
-    sourceNode: SourceNode,
-    blockNode: BlockNode,
-    addSourceNode: AddSourceNode,
-    addBlockNode: AddBlockNode
+    unifiedSourceNode: UnifiedSourceNode,
+    unifiedBlockNode: UnifiedBlockNode
 };
 
 export default function Flow() {
@@ -36,19 +34,27 @@ export default function Flow() {
         },
         {
             id: 'add-source',
-            position: { x: 300, y: 300 }, // Positioned above and to the right
-            type: 'addSourceNode',
-            data: { label: 'Add Lead Source', description: 'Click to add leads from List or CRM' },
+            position: { x: 300, y: 300 },
+            type: 'unifiedSourceNode',
+            data: {
+                isAdder: true,
+                label: 'Add Lead Source',
+                description: 'Click to add leads from List or CRM'
+            },
         },
         {
             id: 'add-block',
-            position: { x: 390, y: 600 }, // Positioned above and to the right
-            type: 'addBlockNode', // Ensure this type is defined in your custom nodes
-            data: { label: 'Add Block', description: 'Click to add block to the sequence' },
+            position: { x: 390, y: 600 },
+            type: 'unifiedBlockNode',
+            data: {
+                isAdder: true,
+                label: 'Add Block',
+                description: 'Click to add block to the sequence'
+            },
         }
     ];
 
-    const initialEdges: Edge[] =[];
+    const initialEdges: Edge[] = [];
 
     const [nodes, setNodes] = useState<Node[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(initialEdges);
