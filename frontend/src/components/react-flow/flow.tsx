@@ -1,80 +1,45 @@
 import {
     ReactFlow, Controls, Background, applyEdgeChanges, applyNodeChanges, addEdge,
-    type Node, type Edge, type NodeChange, type EdgeChange, type Connection
+    type Node,
+    type Edge,
+    type NodeChange,
+    type EdgeChange,
+    type Connection
 } from '@xyflow/react';
+
 import '@xyflow/react/dist/style.css';
-import { useState, useCallback, type CSSProperties } from 'react';
-import { UnifiedSourceNode } from './unified-source-node';
-import { UnifiedBlockNode } from './unified-block-node';
-
-
+import { useCallback } from 'react';
+import { SourceNode } from './source-node';
+import { BlockNode } from './block-node';
 
 // Define node types with unified components
 const nodeTypes = {
-    unifiedSourceNode: UnifiedSourceNode,
-    unifiedBlockNode: UnifiedBlockNode
+    sourceNode: SourceNode,
+    blockNode: BlockNode
 };
 
-export default function Flow() {
-    // Initial nodes setup
-    const initialNodes: Node[] = [
-        {
-            id: '1',
-            position: { x: 315, y: 500 }, // Sequence Start Point at the bottom
-            data: { label: 'Sequence Start Point' },
-            style: {
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '15px',
-                width: 200,
-                textAlign: 'center' as const,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            } as CSSProperties
-        },
-        {
-            id: 'add-source',
-            position: { x: 300, y: 300 },
-            type: 'unifiedSourceNode',
-            data: {
-                isAdder: true,
-                label: 'Add Lead Source',
-                description: 'Click to add leads from List or CRM'
-            },
-        },
-        {
-            id: 'add-block',
-            position: { x: 390, y: 600 },
-            type: 'unifiedBlockNode',
-            data: {
-                isAdder: true,
-                label: 'Add Block',
-                description: 'Click to add block to the sequence'
-            },
-        }
-    ];
+type FlowProps = {
+    nodes: Node[];
+    edges: Edge[];
+    setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+    setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
+};
 
-    const initialEdges: Edge[] = [];
+export default function Flow({ nodes, edges, setNodes, setEdges }: FlowProps) {
 
-    const [nodes, setNodes] = useState<Node[]>(initialNodes);
-    const [edges, setEdges] = useState<Edge[]>(initialEdges);
-
-    // Handle nodes changes
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
-        [],
+        [setNodes], 
     );
 
-    // Handle edges changes
     const onEdgesChange = useCallback(
         (changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-        [],
+        [setEdges], 
     );
 
-    // Handle new connections
     const onConnect = useCallback(
         (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-        [],
+        [setEdges], 
     );
 
     return (
@@ -86,8 +51,7 @@ export default function Flow() {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
-                defaultEdgeOptions={{ type: 'smoothstep' }}
-                fitView
+                // fitView
             >
                 <Background color="#f8f9fa" gap={16} />
                 <Controls showInteractive={false} />

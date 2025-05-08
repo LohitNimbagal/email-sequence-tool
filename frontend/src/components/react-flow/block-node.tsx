@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Check, Mail, Plus } from 'lucide-react';
+import { nanoid } from 'nanoid';
 
 
 interface BlockNodeData {
@@ -31,18 +32,18 @@ interface BlockNodeData {
     subtitle?: string;
 }
 
-// Define props for the UnifiedSourceNode component
+// Define props for the SourceNode component
 interface UnifiedBLockNodeProps {
     data: BlockNodeData;
     id: string;
 }
 
 /**
- * UnifiedBlockNode component that serves both as:
+ * BlockNode component that serves both as:
  * 1. A block adder node (isAdder=true)
  * 2. A regular block node (isAdder=false)
  */
-export function UnifiedBlockNode({ data, id }: UnifiedBLockNodeProps) {
+export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
 
     const isAdder = data.isAdder || false;
 
@@ -66,11 +67,11 @@ export function UnifiedBlockNode({ data, id }: UnifiedBLockNodeProps) {
                 const VERTICAL_SPACING = 150;
 
                 const existingNodes = reactFlow.getNodes();
-                const startNode = existingNodes.find(node => node.id === '1');
+                const startNode = existingNodes.find(node => node.id === 'node-sequence-starting-point');
                 const blockNodes = existingNodes.filter(node =>
-                    node.type === 'unifiedBlockNode' && !node.data.isAdder);
+                    node.type === 'blockNode' && !node.data.isAdder);
                 const addBlockNode = existingNodes.find(node =>
-                    node.type === 'unifiedBlockNode' && node.data.isAdder);
+                    node.type === 'blockNode' && node.data.isAdder);
 
                 const xPosition = startNode ? startNode.position.x : 300;
 
@@ -84,8 +85,8 @@ export function UnifiedBlockNode({ data, id }: UnifiedBLockNodeProps) {
                 }
 
                 const newBlockNode = {
-                    id: Date.now().toString(),
-                    type: 'unifiedBlockNode',
+                    id: `node-${nanoid()}`,
+                    type: 'blockNode',
                     position: { x: xPosition, y: yPosition },
                     data: {
                         isAdder: false,
@@ -121,7 +122,7 @@ export function UnifiedBlockNode({ data, id }: UnifiedBLockNodeProps) {
                 );
 
                 // Determine which block to connect from
-                let previousBlockId = '1'; // default to start
+                let previousBlockId = 'node-sequence-starting-point'; // default to start
                 if (blockNodes.length > 0) {
                     const latestBlock = blockNodes.reduce((latest, node) =>
                         node.position.y > latest.position.y ? node : latest, blockNodes[0]);
@@ -130,7 +131,7 @@ export function UnifiedBlockNode({ data, id }: UnifiedBLockNodeProps) {
 
                 // Add edge from previous block to the new one
                 cleanedEdges.push({
-                    id: `edge-${previousBlockId}-${newBlockNode.id}`,
+                    id: `edge-${nanoid()}`,
                     source: previousBlockId,
                     target: newBlockNode.id,
                     type: 'default',
@@ -139,7 +140,7 @@ export function UnifiedBlockNode({ data, id }: UnifiedBLockNodeProps) {
                 // Add edge from new block to adder node if it exists
                 if (addBlockNode) {
                     cleanedEdges.push({
-                        id: `edge-${newBlockNode.id}-${addBlockNode.id}`,
+                        id: `edge-${nanoid()}`,
                         source: newBlockNode.id,
                         target: addBlockNode.id,
                         type: 'default',

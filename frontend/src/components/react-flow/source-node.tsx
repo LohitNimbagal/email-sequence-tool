@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Plus } from 'lucide-react';
+import { nanoid } from 'nanoid';
 
 interface SourceNodeData {
     isAdder?: boolean;
@@ -23,18 +24,18 @@ interface SourceNodeData {
     subtitle?: string;
 }
 
-// Define props for the UnifiedSourceNode component
-interface UnifiedSourceNodeProps {
+// Define props for the SourceNode component
+interface SourceNodeProps {
     data: SourceNodeData;
     id: string;
 }
 
 /**
- * UnifiedSourceNode component that serves both as:
+ * SourceNode component that serves both as:
  * 1. A source adder node (isAdder=true)
  * 2. A regular source node (isAdder=false)
  */
-export function UnifiedSourceNode({ data, id }: UnifiedSourceNodeProps) {
+export function SourceNode({ data, id }: SourceNodeProps) {
     const isAdder = data.isAdder || false;
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -68,7 +69,7 @@ export function UnifiedSourceNode({ data, id }: UnifiedSourceNodeProps) {
                 const START_Y = 300;
                 const existingNodes = reactFlow.getNodes();
                 const sourceNodes = existingNodes.filter(node =>
-                    node.type === 'unifiedSourceNode' && !node.data.isAdder);
+                    node.type === 'sourceNode' && !node.data.isAdder);
 
                 // Calculate X position for the new node
                 let xPosition;
@@ -82,13 +83,13 @@ export function UnifiedSourceNode({ data, id }: UnifiedSourceNodeProps) {
                     xPosition = rightmostNodeX + HORIZONTAL_SPACING;
                 } else {
                     // First source node — place to the right of node '1'
-                    const startNode = existingNodes.find(node => node.id === '1');
+                    const startNode = existingNodes.find(node => node.id === 'node-sequence-starting-point');
                     xPosition = startNode ? startNode.position.x + HORIZONTAL_SPACING : 300;
                 }
 
                 const newNode = {
-                    id: Date.now().toString(),
-                    type: 'unifiedSourceNode',
+                    id: `node-${nanoid()}`,
+                    type: 'sourceNode',
                     position: { x: xPosition, y: START_Y },
                     data: {
                         isAdder: false,
@@ -101,9 +102,9 @@ export function UnifiedSourceNode({ data, id }: UnifiedSourceNodeProps) {
 
                 // Create a new edge to connect the new source node to the sequence start point (id: '1')
                 const newEdge = {
-                    id: `edge-${Date.now()}`,
+                    id: `edge-${nanoid()}`,
                     source: newNode.id,
-                    target: '1', // Connect to the sequence start point
+                    target: 'node-sequence-starting-point', // Connect to the sequence start point
                     type: 'default',
                 };
 
@@ -112,8 +113,8 @@ export function UnifiedSourceNode({ data, id }: UnifiedSourceNodeProps) {
 
                 if (addBlockNode) {
                     reactFlow.addEdges({
-                        id: `default-edge-to-add`,
-                        source: '1',
+                        id: `edge-${nanoid()}`,
+                        source: 'node-sequence-starting-point',
                         target: addBlockNode.id,
                         type: 'default',
                     });

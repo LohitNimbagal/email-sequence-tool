@@ -1,10 +1,13 @@
 import { queryOptions } from "@tanstack/react-query";
+import type { Edge, Node } from "@xyflow/react";
 
 export interface Sequence {
     _id: string;
     name: string;
     status?: string;
     scheduleTime?: string;
+    nodes: Node[]
+    edges: Edge[]
 }
 
 export const fetchSequences = async (): Promise<Sequence[]> => {
@@ -49,7 +52,6 @@ export const fetchSequence = async (sequenceId: string): Promise<Sequence> => {
     }
 };
 
-
 export const createSequence = async (name: string): Promise<Sequence> => {
     const response = await fetch('http://localhost:8080/sequences', {
         method: 'POST',
@@ -76,3 +78,16 @@ export const sequenceQueryOptions = (sequenceId: string) => queryOptions({
     queryKey: ['sequences', { sequenceId }],
     queryFn: () => fetchSequence(sequenceId),
 })
+
+export const saveSquence = async ({ nodes, edges, sequenceId, name }: { nodes: Node[], edges: Edge[], sequenceId: string, name: string }) => {
+    const response = await fetch(`http://localhost:8080/sequences/${sequenceId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ nodes, edges, name }),
+    });
+    if (!response.ok) throw new Error('Failed to update sequence');
+    return response.json();
+}
