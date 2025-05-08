@@ -4,10 +4,9 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createSequence, sequencesQueryOptions, type Sequence } from '@/services/sequence'
-import { PlusCircle, Search, Send } from "lucide-react"
+import { PlusCircle, Search } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
 import {
     Dialog,
     DialogContent,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import EmailScheduler from '@/components/email-scheduler'
 
 export const Route = createFileRoute('/(protected)/dashboard/')({
     loader: ({ context: { queryClient } }) => {
@@ -178,47 +178,7 @@ export default function Dashboard() {
 
                 {/* Email Scheduler Tab */}
                 <TabsContent value="scheduler">
-                    <Card className="w-full">
-                        <CardHeader>
-                            <CardTitle>Quick Email Scheduler</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-6">
-                                <div className="grid gap-3">
-                                    <Label htmlFor="email-to">To</Label>
-                                    <Input id="email-to" placeholder="Enter email address or select list" />
-                                </div>
-
-                                <div className="grid gap-3">
-                                    <Label htmlFor="email-subject">Subject</Label>
-                                    <Input id="email-subject" placeholder="Enter email subject" />
-                                </div>
-
-                                <div className="grid gap-3">
-                                    <Label htmlFor="email-body">Email Body</Label>
-                                    <Textarea id="email-body" placeholder="Write your email content here..." className="min-h-[200px]" />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="grid gap-3">
-                                        <Label htmlFor="schedule-date">Schedule Date</Label>
-                                        <Input id="schedule-date" type="date" />
-                                    </div>
-                                    <div className="grid gap-3">
-                                        <Label htmlFor="schedule-time">Schedule Time</Label>
-                                        <Input id="schedule-time" type="time" />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end">
-                                    <Button className="w-full md:w-auto">
-                                        <Send className="mr-2 h-4 w-4" />
-                                        Schedule Email
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <EmailScheduler />
                 </TabsContent>
             </Tabs>
         </div>
