@@ -7,9 +7,11 @@ export const Route = createFileRoute('/(protected)')({
 
 function RouteComponent() {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col items-center">
       <Navbar />
-      <Outlet />
+      <main className="w-full flex-1 p-4 flex items-start justify-center max-w-7xl">
+        <Outlet />
+      </main>
     </div>
   )
 }

@@ -10,7 +10,7 @@ import '@xyflow/react/dist/style.css';
 import { useState, type CSSProperties } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 
-export const Route = createFileRoute('/(protected)/outreach/sequences/$sequenceId/')({
+export const Route = createFileRoute('/(protected)/dashboard/sequences/$sequenceId/')({
   loader: async ({ context: { queryClient }, params: { sequenceId } }) => {
     return queryClient.ensureQueryData(sequenceQueryOptions(sequenceId))
   },
@@ -22,8 +22,6 @@ function RouteComponent() {
 
   const sequenceId = Route.useParams().sequenceId
   const { data: sequence, isLoading } = useSuspenseQuery(sequenceQueryOptions(sequenceId))
-
-  console.log(sequence);
 
   // Initial nodes setup
   const initialNodes: Node[] = [
@@ -65,8 +63,8 @@ function RouteComponent() {
 
   const initialEdges: Edge[] = [];
 
-  const [nodes, setNodes] = useState<Node[]>(sequence.nodes ? sequence.nodes : initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(sequence.edges ? sequence.edges :initialEdges);
+  const [nodes, setNodes] = useState<Node[]>(sequence.nodes.length > 0 ? sequence.nodes : initialNodes);
+  const [edges, setEdges] = useState<Edge[]>(sequence.edges.length > 0 ? sequence.edges : initialEdges);
 
   const updateSequenceMutation = useMutation({
     mutationFn: saveSquence,

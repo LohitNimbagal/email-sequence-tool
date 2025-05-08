@@ -12,28 +12,17 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as protectedRouteImport } from './routes/(protected)/route'
-import { Route as protectedIndexImport } from './routes/(protected)/index'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
-import { Route as protectedOutreachRouteImport } from './routes/(protected)/outreach/route'
-import { Route as protectedOutreachIndexImport } from './routes/(protected)/outreach/index'
-import { Route as protectedOutreachSequencesIndexImport } from './routes/(protected)/outreach/sequences/index'
-import { Route as protectedOutreachOutboxIndexImport } from './routes/(protected)/outreach/outbox/index'
-import { Route as protectedOutreachListsIndexImport } from './routes/(protected)/outreach/lists/index'
-import { Route as protectedOutreachTemplatesTemplatesImport } from './routes/(protected)/outreach/templates/templates'
-import { Route as protectedOutreachSequencesSequenceIdIndexImport } from './routes/(protected)/outreach/sequences/$sequenceId/index'
+import { Route as protectedDashboardIndexImport } from './routes/(protected)/dashboard/index'
+import { Route as protectedDashboardSequencesIndexImport } from './routes/(protected)/dashboard/sequences/index'
+import { Route as protectedDashboardSequencesSequenceIdIndexImport } from './routes/(protected)/dashboard/sequences/$sequenceId/index'
 
 // Create/Update Routes
 
 const protectedRouteRoute = protectedRouteImport.update({
   id: '/(protected)',
   getParentRoute: () => rootRoute,
-} as any)
-
-const protectedIndexRoute = protectedIndexImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => protectedRouteRoute,
 } as any)
 
 const authRegisterRoute = authRegisterImport.update({
@@ -48,51 +37,24 @@ const authLoginRoute = authLoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const protectedOutreachRouteRoute = protectedOutreachRouteImport.update({
-  id: '/outreach',
-  path: '/outreach',
+const protectedDashboardIndexRoute = protectedDashboardIndexImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
   getParentRoute: () => protectedRouteRoute,
 } as any)
 
-const protectedOutreachIndexRoute = protectedOutreachIndexImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => protectedOutreachRouteRoute,
-} as any)
-
-const protectedOutreachSequencesIndexRoute =
-  protectedOutreachSequencesIndexImport.update({
-    id: '/sequences/',
-    path: '/sequences/',
-    getParentRoute: () => protectedOutreachRouteRoute,
+const protectedDashboardSequencesIndexRoute =
+  protectedDashboardSequencesIndexImport.update({
+    id: '/dashboard/sequences/',
+    path: '/dashboard/sequences/',
+    getParentRoute: () => protectedRouteRoute,
   } as any)
 
-const protectedOutreachOutboxIndexRoute =
-  protectedOutreachOutboxIndexImport.update({
-    id: '/outbox/',
-    path: '/outbox/',
-    getParentRoute: () => protectedOutreachRouteRoute,
-  } as any)
-
-const protectedOutreachListsIndexRoute =
-  protectedOutreachListsIndexImport.update({
-    id: '/lists/',
-    path: '/lists/',
-    getParentRoute: () => protectedOutreachRouteRoute,
-  } as any)
-
-const protectedOutreachTemplatesTemplatesRoute =
-  protectedOutreachTemplatesTemplatesImport.update({
-    id: '/templates/templates',
-    path: '/templates/templates',
-    getParentRoute: () => protectedOutreachRouteRoute,
-  } as any)
-
-const protectedOutreachSequencesSequenceIdIndexRoute =
-  protectedOutreachSequencesSequenceIdIndexImport.update({
-    id: '/sequences/$sequenceId/',
-    path: '/sequences/$sequenceId/',
-    getParentRoute: () => protectedOutreachRouteRoute,
+const protectedDashboardSequencesSequenceIdIndexRoute =
+  protectedDashboardSequencesSequenceIdIndexImport.update({
+    id: '/dashboard/sequences/$sequenceId/',
+    path: '/dashboard/sequences/$sequenceId/',
+    getParentRoute: () => protectedRouteRoute,
   } as any)
 
 // Populate the FileRoutesByPath interface
@@ -105,13 +67,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof protectedRouteImport
       parentRoute: typeof rootRoute
-    }
-    '/(protected)/outreach': {
-      id: '/(protected)/outreach'
-      path: '/outreach'
-      fullPath: '/outreach'
-      preLoaderRoute: typeof protectedOutreachRouteImport
-      parentRoute: typeof protectedRouteImport
     }
     '/(auth)/login': {
       id: '/(auth)/login'
@@ -127,94 +82,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authRegisterImport
       parentRoute: typeof rootRoute
     }
-    '/(protected)/': {
-      id: '/(protected)/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof protectedIndexImport
+    '/(protected)/dashboard/': {
+      id: '/(protected)/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof protectedDashboardIndexImport
       parentRoute: typeof protectedRouteImport
     }
-    '/(protected)/outreach/': {
-      id: '/(protected)/outreach/'
-      path: '/'
-      fullPath: '/outreach/'
-      preLoaderRoute: typeof protectedOutreachIndexImport
-      parentRoute: typeof protectedOutreachRouteImport
+    '/(protected)/dashboard/sequences/': {
+      id: '/(protected)/dashboard/sequences/'
+      path: '/dashboard/sequences'
+      fullPath: '/dashboard/sequences'
+      preLoaderRoute: typeof protectedDashboardSequencesIndexImport
+      parentRoute: typeof protectedRouteImport
     }
-    '/(protected)/outreach/templates/templates': {
-      id: '/(protected)/outreach/templates/templates'
-      path: '/templates/templates'
-      fullPath: '/outreach/templates/templates'
-      preLoaderRoute: typeof protectedOutreachTemplatesTemplatesImport
-      parentRoute: typeof protectedOutreachRouteImport
-    }
-    '/(protected)/outreach/lists/': {
-      id: '/(protected)/outreach/lists/'
-      path: '/lists'
-      fullPath: '/outreach/lists'
-      preLoaderRoute: typeof protectedOutreachListsIndexImport
-      parentRoute: typeof protectedOutreachRouteImport
-    }
-    '/(protected)/outreach/outbox/': {
-      id: '/(protected)/outreach/outbox/'
-      path: '/outbox'
-      fullPath: '/outreach/outbox'
-      preLoaderRoute: typeof protectedOutreachOutboxIndexImport
-      parentRoute: typeof protectedOutreachRouteImport
-    }
-    '/(protected)/outreach/sequences/': {
-      id: '/(protected)/outreach/sequences/'
-      path: '/sequences'
-      fullPath: '/outreach/sequences'
-      preLoaderRoute: typeof protectedOutreachSequencesIndexImport
-      parentRoute: typeof protectedOutreachRouteImport
-    }
-    '/(protected)/outreach/sequences/$sequenceId/': {
-      id: '/(protected)/outreach/sequences/$sequenceId/'
-      path: '/sequences/$sequenceId'
-      fullPath: '/outreach/sequences/$sequenceId'
-      preLoaderRoute: typeof protectedOutreachSequencesSequenceIdIndexImport
-      parentRoute: typeof protectedOutreachRouteImport
+    '/(protected)/dashboard/sequences/$sequenceId/': {
+      id: '/(protected)/dashboard/sequences/$sequenceId/'
+      path: '/dashboard/sequences/$sequenceId'
+      fullPath: '/dashboard/sequences/$sequenceId'
+      preLoaderRoute: typeof protectedDashboardSequencesSequenceIdIndexImport
+      parentRoute: typeof protectedRouteImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface protectedOutreachRouteRouteChildren {
-  protectedOutreachIndexRoute: typeof protectedOutreachIndexRoute
-  protectedOutreachTemplatesTemplatesRoute: typeof protectedOutreachTemplatesTemplatesRoute
-  protectedOutreachListsIndexRoute: typeof protectedOutreachListsIndexRoute
-  protectedOutreachOutboxIndexRoute: typeof protectedOutreachOutboxIndexRoute
-  protectedOutreachSequencesIndexRoute: typeof protectedOutreachSequencesIndexRoute
-  protectedOutreachSequencesSequenceIdIndexRoute: typeof protectedOutreachSequencesSequenceIdIndexRoute
-}
-
-const protectedOutreachRouteRouteChildren: protectedOutreachRouteRouteChildren =
-  {
-    protectedOutreachIndexRoute: protectedOutreachIndexRoute,
-    protectedOutreachTemplatesTemplatesRoute:
-      protectedOutreachTemplatesTemplatesRoute,
-    protectedOutreachListsIndexRoute: protectedOutreachListsIndexRoute,
-    protectedOutreachOutboxIndexRoute: protectedOutreachOutboxIndexRoute,
-    protectedOutreachSequencesIndexRoute: protectedOutreachSequencesIndexRoute,
-    protectedOutreachSequencesSequenceIdIndexRoute:
-      protectedOutreachSequencesSequenceIdIndexRoute,
-  }
-
-const protectedOutreachRouteRouteWithChildren =
-  protectedOutreachRouteRoute._addFileChildren(
-    protectedOutreachRouteRouteChildren,
-  )
-
 interface protectedRouteRouteChildren {
-  protectedOutreachRouteRoute: typeof protectedOutreachRouteRouteWithChildren
-  protectedIndexRoute: typeof protectedIndexRoute
+  protectedDashboardIndexRoute: typeof protectedDashboardIndexRoute
+  protectedDashboardSequencesIndexRoute: typeof protectedDashboardSequencesIndexRoute
+  protectedDashboardSequencesSequenceIdIndexRoute: typeof protectedDashboardSequencesSequenceIdIndexRoute
 }
 
 const protectedRouteRouteChildren: protectedRouteRouteChildren = {
-  protectedOutreachRouteRoute: protectedOutreachRouteRouteWithChildren,
-  protectedIndexRoute: protectedIndexRoute,
+  protectedDashboardIndexRoute: protectedDashboardIndexRoute,
+  protectedDashboardSequencesIndexRoute: protectedDashboardSequencesIndexRoute,
+  protectedDashboardSequencesSequenceIdIndexRoute:
+    protectedDashboardSequencesSequenceIdIndexRoute,
 }
 
 const protectedRouteRouteWithChildren = protectedRouteRoute._addFileChildren(
@@ -222,82 +126,58 @@ const protectedRouteRouteWithChildren = protectedRouteRoute._addFileChildren(
 )
 
 export interface FileRoutesByFullPath {
-  '/': typeof protectedIndexRoute
-  '/outreach': typeof protectedOutreachRouteRouteWithChildren
+  '/': typeof protectedRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
-  '/outreach/': typeof protectedOutreachIndexRoute
-  '/outreach/templates/templates': typeof protectedOutreachTemplatesTemplatesRoute
-  '/outreach/lists': typeof protectedOutreachListsIndexRoute
-  '/outreach/outbox': typeof protectedOutreachOutboxIndexRoute
-  '/outreach/sequences': typeof protectedOutreachSequencesIndexRoute
-  '/outreach/sequences/$sequenceId': typeof protectedOutreachSequencesSequenceIdIndexRoute
+  '/dashboard': typeof protectedDashboardIndexRoute
+  '/dashboard/sequences': typeof protectedDashboardSequencesIndexRoute
+  '/dashboard/sequences/$sequenceId': typeof protectedDashboardSequencesSequenceIdIndexRoute
 }
 
 export interface FileRoutesByTo {
+  '/': typeof protectedRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
-  '/': typeof protectedIndexRoute
-  '/outreach': typeof protectedOutreachIndexRoute
-  '/outreach/templates/templates': typeof protectedOutreachTemplatesTemplatesRoute
-  '/outreach/lists': typeof protectedOutreachListsIndexRoute
-  '/outreach/outbox': typeof protectedOutreachOutboxIndexRoute
-  '/outreach/sequences': typeof protectedOutreachSequencesIndexRoute
-  '/outreach/sequences/$sequenceId': typeof protectedOutreachSequencesSequenceIdIndexRoute
+  '/dashboard': typeof protectedDashboardIndexRoute
+  '/dashboard/sequences': typeof protectedDashboardSequencesIndexRoute
+  '/dashboard/sequences/$sequenceId': typeof protectedDashboardSequencesSequenceIdIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/(protected)': typeof protectedRouteRouteWithChildren
-  '/(protected)/outreach': typeof protectedOutreachRouteRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
-  '/(protected)/': typeof protectedIndexRoute
-  '/(protected)/outreach/': typeof protectedOutreachIndexRoute
-  '/(protected)/outreach/templates/templates': typeof protectedOutreachTemplatesTemplatesRoute
-  '/(protected)/outreach/lists/': typeof protectedOutreachListsIndexRoute
-  '/(protected)/outreach/outbox/': typeof protectedOutreachOutboxIndexRoute
-  '/(protected)/outreach/sequences/': typeof protectedOutreachSequencesIndexRoute
-  '/(protected)/outreach/sequences/$sequenceId/': typeof protectedOutreachSequencesSequenceIdIndexRoute
+  '/(protected)/dashboard/': typeof protectedDashboardIndexRoute
+  '/(protected)/dashboard/sequences/': typeof protectedDashboardSequencesIndexRoute
+  '/(protected)/dashboard/sequences/$sequenceId/': typeof protectedDashboardSequencesSequenceIdIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/outreach'
     | '/login'
     | '/register'
-    | '/outreach/'
-    | '/outreach/templates/templates'
-    | '/outreach/lists'
-    | '/outreach/outbox'
-    | '/outreach/sequences'
-    | '/outreach/sequences/$sequenceId'
+    | '/dashboard'
+    | '/dashboard/sequences'
+    | '/dashboard/sequences/$sequenceId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/register'
-    | '/'
-    | '/outreach'
-    | '/outreach/templates/templates'
-    | '/outreach/lists'
-    | '/outreach/outbox'
-    | '/outreach/sequences'
-    | '/outreach/sequences/$sequenceId'
+    | '/dashboard'
+    | '/dashboard/sequences'
+    | '/dashboard/sequences/$sequenceId'
   id:
     | '__root__'
     | '/(protected)'
-    | '/(protected)/outreach'
     | '/(auth)/login'
     | '/(auth)/register'
-    | '/(protected)/'
-    | '/(protected)/outreach/'
-    | '/(protected)/outreach/templates/templates'
-    | '/(protected)/outreach/lists/'
-    | '/(protected)/outreach/outbox/'
-    | '/(protected)/outreach/sequences/'
-    | '/(protected)/outreach/sequences/$sequenceId/'
+    | '/(protected)/dashboard/'
+    | '/(protected)/dashboard/sequences/'
+    | '/(protected)/dashboard/sequences/$sequenceId/'
   fileRoutesById: FileRoutesById
 }
 
@@ -331,20 +211,9 @@ export const routeTree = rootRoute
     "/(protected)": {
       "filePath": "(protected)/route.tsx",
       "children": [
-        "/(protected)/outreach",
-        "/(protected)/"
-      ]
-    },
-    "/(protected)/outreach": {
-      "filePath": "(protected)/outreach/route.tsx",
-      "parent": "/(protected)",
-      "children": [
-        "/(protected)/outreach/",
-        "/(protected)/outreach/templates/templates",
-        "/(protected)/outreach/lists/",
-        "/(protected)/outreach/outbox/",
-        "/(protected)/outreach/sequences/",
-        "/(protected)/outreach/sequences/$sequenceId/"
+        "/(protected)/dashboard/",
+        "/(protected)/dashboard/sequences/",
+        "/(protected)/dashboard/sequences/$sequenceId/"
       ]
     },
     "/(auth)/login": {
@@ -353,33 +222,17 @@ export const routeTree = rootRoute
     "/(auth)/register": {
       "filePath": "(auth)/register.tsx"
     },
-    "/(protected)/": {
-      "filePath": "(protected)/index.tsx",
+    "/(protected)/dashboard/": {
+      "filePath": "(protected)/dashboard/index.tsx",
       "parent": "/(protected)"
     },
-    "/(protected)/outreach/": {
-      "filePath": "(protected)/outreach/index.tsx",
-      "parent": "/(protected)/outreach"
+    "/(protected)/dashboard/sequences/": {
+      "filePath": "(protected)/dashboard/sequences/index.tsx",
+      "parent": "/(protected)"
     },
-    "/(protected)/outreach/templates/templates": {
-      "filePath": "(protected)/outreach/templates/templates.tsx",
-      "parent": "/(protected)/outreach"
-    },
-    "/(protected)/outreach/lists/": {
-      "filePath": "(protected)/outreach/lists/index.tsx",
-      "parent": "/(protected)/outreach"
-    },
-    "/(protected)/outreach/outbox/": {
-      "filePath": "(protected)/outreach/outbox/index.tsx",
-      "parent": "/(protected)/outreach"
-    },
-    "/(protected)/outreach/sequences/": {
-      "filePath": "(protected)/outreach/sequences/index.tsx",
-      "parent": "/(protected)/outreach"
-    },
-    "/(protected)/outreach/sequences/$sequenceId/": {
-      "filePath": "(protected)/outreach/sequences/$sequenceId/index.tsx",
-      "parent": "/(protected)/outreach"
+    "/(protected)/dashboard/sequences/$sequenceId/": {
+      "filePath": "(protected)/dashboard/sequences/$sequenceId/index.tsx",
+      "parent": "/(protected)"
     }
   }
 }

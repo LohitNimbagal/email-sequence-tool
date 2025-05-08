@@ -8,33 +8,20 @@ import {
     DropdownMenuContent,
     DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
-import { Link } from '@tanstack/react-router'
-
-const navItems = [
-    { name: 'Dashboard', href: '/', key: 'dashboard' },
-    { name: 'Outreach', href: '/outreach', key: 'outreach' }
-]
 
 export default function Navbar() {
 
     const [mobileOpen, setMobileOpen] = useState(false)
-    // const navigate = useNavigate()
-
-    // const handleLogout = () => {
-    //     console.log('Logging out...')
-    //     // perform logout logic
-    //     navigate('/login')
-    // }
 
     return (
-        <header className="bg-white border-b border-muted-200 shadow-sm">
+        <header className="bg-white border-b border-muted-200 shadow-sm w-full">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
 
                     {/* Left: Logo & Nav */}
                     <div className="flex items-center space-x-2">
                         <Lightbulb className="w-6 h-6 text-primary" />
-                        <nav className="hidden sm:flex items-center space-x-4">
+                        {/* <nav className="hidden sm:flex items-center space-x-4">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.key}
@@ -50,7 +37,7 @@ export default function Navbar() {
                                     {item.name}
                                 </Link>
                             ))}
-                        </nav>
+                        </nav> */}
                     </div>
 
                     {/* Right: Mobile toggle & User */}
@@ -84,7 +71,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu */}
-            {mobileOpen && (
+            {/* {mobileOpen && (
                 <div className="sm:hidden px-4 pb-4 pt-2 space-y-1">
                     {navItems.map((item) => (
                         <Link
@@ -103,7 +90,7 @@ export default function Navbar() {
                         </Link>
                     ))}
                 </div>
-            )}
+            )} */}
         </header>
     )
 }
