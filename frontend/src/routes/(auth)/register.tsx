@@ -1,87 +1,121 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { authService } from '../../services/auth-service'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { toast } from '@/hooks/use-toast'
 
-import { useState } from "react";
-import { authService } from "../../services/auth-service";
+const registerSchema = z.object({
+  username: z.string().min(2, { message: 'Username is required' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+})
+
+type RegisterSchema = z.infer<typeof registerSchema>
 
 export const Route = createFileRoute('/(auth)/register')({
-  component: Register,
+  component: Register
 })
 
 function Register() {
+  const form = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
+    mode: 'onChange'
+  })
 
-  // const navigate = useNavigate();
-
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const onSubmit = async (values: RegisterSchema) => {
     try {
-      await authService.register({ username, email, password });
-      // if (response.success) {
-      // navigate("/login");
-      // }
-    } catch (err) {
+      await authService.register(values)
+    } catch (err: unknown) {
       console.log(err);
-      setError("Registration failed. Please try again.");
+      toast({
+        title: "Registration Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      })
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleRegister} className="bg-white p-6 rounded-xl shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">Register</CardTitle>
+          <CardDescription>Create a new account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {form.formState.errors.root && (
+                <div className="text-sm text-red-600 bg-red-100 p-2 rounded">
+                  {form.formState.errors.root.message}
+                </div>
+              )}
 
-        {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
-            {error}
-          </div>
-        )}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <input
-          type="text"
-          required
-          placeholder="Username"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="you@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <input
-          type="password"
-          required
-          placeholder="Password"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+              <Button type="submit" className="w-full">Register</Button>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-        >
-          Register
-        </button>
-
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login
-          </Link>
-        </p>
-      </form>
+              <p className="mt-4 text-center text-sm text-gray-600">
+                Already have an account?{' '}
+                <Link to="/login" className="text-blue-600 hover:underline">
+                  Login
+                </Link>
+              </p>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
