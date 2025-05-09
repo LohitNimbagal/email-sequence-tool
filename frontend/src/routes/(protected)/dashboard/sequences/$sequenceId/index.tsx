@@ -1,14 +1,12 @@
 import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-
-import Flow from '@/components/react-flow/flow';
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import Flow from '@/components/react-flow/flow'
 import { Button } from '@/components/ui/button'
-
 import { saveSquence, sequenceQueryOptions } from '@/services/sequence'
-
-import '@xyflow/react/dist/style.css';
-import { useState, type CSSProperties } from 'react';
-import type { Edge, Node } from '@xyflow/react';
+import '@xyflow/react/dist/style.css'
+import { useState, type CSSProperties } from 'react'
+import type { Edge, Node } from '@xyflow/react'
+import { ArrowLeft, Save, Info } from 'lucide-react'
 
 export const Route = createFileRoute('/(protected)/dashboard/sequences/$sequenceId/')({
   loader: async ({ context: { queryClient }, params: { sequenceId } }) => {
@@ -18,7 +16,8 @@ export const Route = createFileRoute('/(protected)/dashboard/sequences/$sequence
 })
 
 function RouteComponent() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const sequenceId = Route.useParams().sequenceId
   const { data: sequence, isLoading } = useSuspenseQuery(sequenceQueryOptions(sequenceId))
@@ -59,49 +58,91 @@ function RouteComponent() {
         description: 'Click to add block to the sequence'
       },
     }
-  ];
+  ]
 
-  const initialEdges: Edge[] = [];
+  const initialEdges: Edge[] = []
 
-  const [nodes, setNodes] = useState<Node[]>(sequence.nodes.length > 0 ? sequence.nodes : initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(sequence.edges.length > 0 ? sequence.edges : initialEdges);
+  const [nodes, setNodes] = useState(sequence?.nodes?.length > 0 ? sequence.nodes : initialNodes)
+  const [edges, setEdges] = useState(sequence?.edges?.length > 0 ? sequence.edges : initialEdges)
 
   const updateSequenceMutation = useMutation({
     mutationFn: saveSquence,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sequences', sequenceId] });
+      queryClient.invalidateQueries({ queryKey: ['sequences', sequenceId] })
     },
-  });
+  })
 
-  if (isLoading) return <div>Loading.....</div>;
+  if (isLoading) return <div className="flex justify-center items-center h-96">Loading...</div>
 
   const handleSave = async () => {
     try {
-      await updateSequenceMutation.mutateAsync({ nodes, edges, sequenceId, name: sequence.name });
+      await updateSequenceMutation.mutateAsync({
+        nodes,
+        edges,
+        sequenceId,
+        name: sequence.name
+      })
     } catch (error) {
-      console.error('Failed to save sequence:', error);
+      console.error('Failed to save sequence:', error)
       // You might want to show an error toast/notification here
     }
-  };
+  }
+
+  const handleBack = () => {
+    navigate({ to: '/dashboard' })
+  }
 
   return (
-    <div className="w-full p-4">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">{sequence.name}</h1>
-          <p className="text-gray-600">
-            Create/Manage your sequences with automated emails & timely tasks.
-          </p>
+    <div className="w-full max-w-7xl space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="h-9 w-9 p-0 rounded-full"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-500" />
+            <span className="sr-only">Back to Dashboard</span>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">{sequence.name}</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Create/Manage your sequences with automated emails & timely tasks.
+            </p>
+          </div>
         </div>
-        <Button onClick={handleSave}>
-          <span>Save Sequence</span>
+        <Button
+          onClick={handleSave}
+          disabled={updateSequenceMutation.isPending}
+          className="h-9 bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
+        >
+          <Save className="h-4 w-4" />
+          {updateSequenceMutation.isPending ? 'Saving...' : 'Save Sequence'}
         </Button>
       </div>
 
-      <div className='bg-red-300 w-[80rem] h-[40rem]'>
-        <Flow nodes={nodes} edges={edges} setNodes={setNodes} setEdges={setEdges} />
-      </div>
+      {/* Flow Designer */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-2 overflow-hidden h-[calc(100vh-180px)]">
+        {/* Sequence Flow Builder instructions */}
+        <div className="bg-blue-50 text-blue-700 px-4 py-2 mb-2 rounded-md flex items-start gap-2 text-sm">
+          <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <div>
+            <span className="font-medium">Sequence Builder:</span>Connect nodes to create your sequence flow. Add lead sources and email blocks as needed.
+          </div>
+        </div>
 
+        {/* The Flow component */}
+        <div className="h-[calc(100%-40px)]">
+          <Flow
+            nodes={nodes}
+            edges={edges}
+            setNodes={setNodes}
+            setEdges={setEdges}
+          />
+        </div>
+      </div>
     </div>
   )
 }
