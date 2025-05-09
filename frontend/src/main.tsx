@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client'
 import { routeTree } from './routeTree.gen'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Toaster } from 'sonner'
+import { Toaster } from './components/ui/toaster'
 
 const queryClient = new QueryClient()
 

@@ -10,13 +10,6 @@ const agenda = new Agenda({
     },
 })
 
-// agenda.define('welcome', async () => {
-//     console.log('welcome to agenda!!!');
-// })
-
-
-// await agenda.every('5 seconds', 'welcome')
-
 const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -28,11 +21,10 @@ const transporter = nodemailer.createTransport({
 
 agenda.define("send scheduled email", async (job) => {
 
-    const { to, subject, text, html } = job.attrs.data as {
+    const { to, subject, body } = job.attrs.data as {
         to: string
         subject: string
-        text: string
-        html: string
+        body: string
     }
 
     try {
@@ -40,10 +32,11 @@ agenda.define("send scheduled email", async (job) => {
             from: '"Roman Nienow" <roman.nienow18@ethereal.email>',
             to,
             subject,
-            text,
-            html,
+            text: body
         })
+
         console.log("Email sent via Agenda:", info.messageId)
+
     } catch (error) {
         console.error("Agenda job failed to send email:", error)
     }
@@ -52,29 +45,54 @@ agenda.define("send scheduled email", async (job) => {
 
 export const sendAnEmail = async (req: Request, res: Response) => {
 
-    const { to, subject, text, html } = req.body;
+    const { to, subject, body, scheduleDate, scheduleTime } = req.body;
 
     try {
-        // Schedule for 1 hour from now
-        const scheduleAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour in ms
+        let scheduleAt: Date | null = null;
 
-        await agenda.start()
+        if (scheduleDate && scheduleTime) {
+            // Combine date and time into ISO format and parse
+            scheduleAt = new Date(`${scheduleDate}T${scheduleTime}:00`);
+        } else if (scheduleDate) {
+            // Default time to midnight if only date is provided
+            scheduleAt = new Date(`${scheduleDate}T00:00:00`);
+        } else if (scheduleTime) {
+            // Schedule for today at the given time
+            const today = new Date();
+            const dateStr = today.toISOString().split("T")[0];
+            scheduleAt = new Date(`${dateStr}T${scheduleTime}:00`);
+        }
 
-        // Schedule the email job
-        await agenda.schedule(scheduleAt, "send scheduled email", {
-            to,
-            subject,
-            text,
-            html,
-        });
+        await agenda.start();
 
-        res.json({
-            success: true,
-            message: `Email scheduled for ${scheduleAt}`,
-        });
+        if (scheduleAt && !isNaN(scheduleAt.getTime())) {
+            // Valid date, schedule the job
+            await agenda.schedule(scheduleAt, "send scheduled email", {
+                to,
+                subject,
+                body,
+            });
 
+            res.json({
+                success: true,
+                message: `Email scheduled for ${scheduleAt.toISOString()}`,
+            });
+
+        } else {
+            // No valid schedule, send immediately
+            await agenda.now("send scheduled email", {
+                to,
+                subject,
+                body
+            });
+
+            res.json({
+                success: true,
+                message: `Email sent immediately`,
+            });
+        }
     } catch (error) {
-        console.error("Failed to schedule email:", error);
-        res.status(500).json({ success: false, error: "Failed to schedule email" });
+        console.error("Failed to send/schedule email:", error);
+        res.status(500).json({ success: false, error: "Failed to send/schedule email" });
     }
 };
