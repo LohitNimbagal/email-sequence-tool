@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { useState, useEffect } from 'react';
+import { Handle, Position, useReactFlow, type Node as FlowNode } from '@xyflow/react';
 import {
     Dialog,
     DialogContent,
@@ -19,17 +19,25 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Check, Mail, Plus } from 'lucide-react';
+import { Clock, Mail, Plus } from 'lucide-react';
 import { nanoid } from 'nanoid';
+import { Input } from '../ui/input';
 
-
-interface BlockNodeData {
+interface BlockNodeData extends Record<string, unknown> {
     isAdder?: boolean;
     label: string;
     description?: string;
-    blockType?: 'list' | string;
+    blockType?: 'cold-email' | 'wait-delay' | string;
     templateName?: string;
     subtitle?: string;
+    duration?: string;
+    durationUnit?: string;
+}
+
+interface NewTypeData extends BlockNodeData {
+    isAdder: boolean;
+    blockType: string;
+    label: string;
 }
 
 // Define props for the SourceNode component
@@ -38,11 +46,6 @@ interface UnifiedBLockNodeProps {
     id: string;
 }
 
-/**
- * BlockNode component that serves both as:
- * 1. A block adder node (isAdder=true)
- * 2. A regular block node (isAdder=false)
- */
 export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
 
     const isAdder = data.isAdder || false;
@@ -53,6 +56,23 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
     const [selectedTemplate, setSelectedTemplate] = useState(data.templateName || "");
     const reactFlow = useReactFlow();
 
+    // Initialize from existing data if available
+    const [delayDuration, setDelayDuration] = useState<string>(data.duration || "");
+    const [delayUnit, setDelayUnit] = useState<string>(data.durationUnit || "minutes");
+
+    // Update local state when data changes
+    useEffect(() => {
+        if (data.templateName) {
+            setSelectedTemplate(data.templateName);
+        }
+        if (data.duration) {
+            setDelayDuration(data.duration);
+        }
+        if (data.durationUnit) {
+            setDelayUnit(data.durationUnit);
+        }
+    }, [data]);
+
     // Handle adding a new block to the flow
     const handleBlockSelect = (blockType: string) => {
         setSelectedBlock(blockType);
@@ -61,120 +81,150 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
 
     // Handle inserting/saving the block
     const handleAction = () => {
+
         if (isAdder) {
-            // Add new block logic
-            if (selectedBlock === "cold-email" && selectedTemplate) {
-                const VERTICAL_SPACING = 150;
+            const VERTICAL_SPACING = 150;
 
-                const existingNodes = reactFlow.getNodes();
-                const startNode = existingNodes.find(node => node.id === 'node-sequence-starting-point');
-                const blockNodes = existingNodes.filter(node =>
-                    node.type === 'blockNode' && !node.data.isAdder);
-                const addBlockNode = existingNodes.find(node =>
-                    node.type === 'blockNode' && node.data.isAdder);
+            const existingNodes = reactFlow.getNodes();
+            const startNode = existingNodes.find(node => node.id === 'node-sequence-starting-point');
+            const blockNodes = existingNodes.filter(node =>
+                node.type === 'blockNode' && !node.data.isAdder);
+            const addBlockNode = existingNodes.find(node =>
+                node.type === 'blockNode' && node.data.isAdder);
 
-                const xPosition = startNode ? startNode.position.x : 300;
+            const xPosition = startNode ? startNode.position.x : 300;
 
-                let yPosition;
-                if (blockNodes.length > 0) {
-                    const lowestBlockY = blockNodes.reduce((max, node) =>
-                        Math.max(max, node.position.y), startNode?.position.y || 0);
-                    yPosition = lowestBlockY + VERTICAL_SPACING;
-                } else {
-                    yPosition = (startNode?.position.y || 0) + VERTICAL_SPACING;
-                }
+            let yPosition;
+            if (blockNodes.length > 0) {
+                const lowestBlockY = blockNodes.reduce((max, node) =>
+                    Math.max(max, node.position.y), startNode?.position.y || 0);
+                yPosition = lowestBlockY + VERTICAL_SPACING;
+            } else {
+                yPosition = (startNode?.position.y || 0) + VERTICAL_SPACING;
+            }
 
-                const newBlockNode = {
-                    id: `node-${nanoid()}`,
-                    type: 'blockNode',
-                    position: { x: xPosition, y: yPosition },
-                    data: {
-                        isAdder: false,
-                        label: selectedBlock === "cold-email" ? "Cold Email" : selectedBlock,
-                        blockType: selectedBlock,
-                        templateName: selectedTemplate,
-                    },
-                };
+            const newBlockId = `node-${nanoid()}`;
 
-                reactFlow.addNodes(newBlockNode);
+            // Block-specific data
+            const blockData: NewTypeData = {
+                isAdder: false,
+                blockType: selectedBlock!,
+                label: selectedBlock === "cold-email" ? "Cold Email" : "Wait / Delay",
+            };
 
-                // Move add block node below the new block
-                if (addBlockNode) {
-                    reactFlow.setNodes(nodes =>
-                        nodes.map(node => {
-                            if (node.id === addBlockNode.id) {
-                                return {
-                                    ...node,
-                                    position: {
-                                        x: xPosition,
-                                        y: yPosition + VERTICAL_SPACING,
-                                    },
-                                };
-                            }
-                            return node;
-                        })
-                    );
-                }
+            if (selectedBlock === "cold-email") {
+                if (!selectedTemplate) return;
+                blockData.templateName = selectedTemplate;
+            } else if (selectedBlock === "wait-delay") {
+                if (!delayDuration || !delayUnit) return;
+                blockData.duration = delayDuration;
+                blockData.durationUnit = delayUnit;
+            }
 
-                // Get all existing edges and remove any targeting the adder node
-                const cleanedEdges = reactFlow.getEdges().filter(edge =>
-                    edge.target !== addBlockNode?.id && edge.target !== newBlockNode.id
+            const newBlockNode: FlowNode = {
+                id: newBlockId,
+                type: 'blockNode',
+                position: { x: xPosition, y: yPosition },
+                data: blockData,
+            };
+
+            reactFlow.addNodes(newBlockNode);
+
+            // Move adder node below new block
+            if (addBlockNode) {
+                reactFlow.setNodes(nodes =>
+                    nodes.map(node => {
+                        if (node.id === addBlockNode.id) {
+                            return {
+                                ...node,
+                                position: {
+                                    x: xPosition,
+                                    y: yPosition + VERTICAL_SPACING,
+                                },
+                            };
+                        }
+                        return node;
+                    })
                 );
+            }
 
-                // Determine which block to connect from
-                let previousBlockId = 'node-sequence-starting-point'; // default to start
-                if (blockNodes.length > 0) {
-                    const latestBlock = blockNodes.reduce((latest, node) =>
-                        node.position.y > latest.position.y ? node : latest, blockNodes[0]);
-                    previousBlockId = latestBlock.id;
-                }
+            // Clean edges
+            const cleanedEdges = reactFlow.getEdges().filter(edge =>
+                edge.target !== addBlockNode?.id && edge.target !== newBlockId
+            );
 
-                // Add edge from previous block to the new one
+            // Determine connection source
+            let previousBlockId = 'node-sequence-starting-point';
+            if (blockNodes.length > 0) {
+                const latestBlock = blockNodes.reduce((latest, node) =>
+                    node.position.y > latest.position.y ? node : latest, blockNodes[0]);
+                previousBlockId = latestBlock.id;
+            }
+
+            // Add new edges
+            cleanedEdges.push({
+                id: `edge-${nanoid()}`,
+                source: previousBlockId,
+                target: newBlockId,
+                type: 'default',
+            });
+
+            if (addBlockNode) {
                 cleanedEdges.push({
                     id: `edge-${nanoid()}`,
-                    source: previousBlockId,
-                    target: newBlockNode.id,
+                    source: newBlockId,
+                    target: addBlockNode.id,
                     type: 'default',
                 });
-
-                // Add edge from new block to adder node if it exists
-                if (addBlockNode) {
-                    cleanedEdges.push({
-                        id: `edge-${nanoid()}`,
-                        source: newBlockNode.id,
-                        target: addBlockNode.id,
-                        type: 'default',
-                    });
-                }
-
-                // Update edges
-                reactFlow.setEdges(cleanedEdges);
             }
+
+            reactFlow.setEdges(cleanedEdges);
         } else {
-            // Update existing block logic
-            reactFlow.setNodes((nodes) =>
-                nodes.map((node) => {
-                    if (node.id === id) {
-                        return {
-                            ...node,
-                            data: {
-                                ...data,
-                                templateName: selectedTemplate,
-                                subtitle: selectedTemplate,
-                                description: data.description || '(added by SalesBlink)'
-                            }
-                        };
-                    }
-                    return node;
-                })
-            );
+            // Update existing block logic with correct block-specific data
+            if (data.blockType === "cold-email") {
+                reactFlow.setNodes((nodes) =>
+                    nodes.map((node) => {
+                        if (node.id === id) {
+                            return {
+                                ...node,
+                                data: {
+                                    ...data,
+                                    templateName: selectedTemplate,
+                                    subtitle: selectedTemplate,
+                                    description: data.description || '(added by SalesBlink)'
+                                }
+                            };
+                        }
+                        return node;
+                    })
+                );
+            } else if (data.blockType === "wait-delay") {
+                reactFlow.setNodes((nodes) =>
+                    nodes.map((node) => {
+                        if (node.id === id) {
+                            return {
+                                ...node,
+                                data: {
+                                    ...data,
+                                    duration: delayDuration,
+                                    durationUnit: delayUnit,
+                                    description: data.description || '(added by SalesBlink)'
+                                }
+                            };
+                        }
+                        return node;
+                    })
+                );
+            }
         }
 
-        // Reset and close dialog
+        // Reset and close
         setStep(1);
         if (isAdder) {
             setSelectedBlock(null);
             setSelectedTemplate("");
+            setDelayDuration("");
+            setDelayUnit("minutes");
         }
         setIsDialogOpen(false);
     };
@@ -204,6 +254,7 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
 
                         {step === 1 && (
                             <div className="grid grid-cols-2 gap-4 py-4">
+                                {/* Cold Email Block */}
                                 <Card
                                     onClick={() => handleBlockSelect("cold-email")}
                                     className={cn(
@@ -221,20 +272,28 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
                                     </CardContent>
                                 </Card>
 
-                                <Card className="opacity-50 cursor-not-allowed">
+                                {/* Wait/Delay Block */}
+                                <Card
+                                    onClick={() => handleBlockSelect("wait-delay")}
+                                    className={cn(
+                                        "cursor-pointer border-2 transition-all",
+                                        selectedBlock === "wait-delay" ? "border-primary" : "border-muted"
+                                    )}
+                                >
                                     <CardContent className="flex items-center">
-                                        <div className="mr-4 bg-blue-100 p-2 rounded-lg">
-                                            <Check className='w-8 h-8 text-blue-500' />
+                                        <div className="mr-4 bg-yellow-100 p-2 rounded-lg">
+                                            <Clock className='w-8 h-8 text-yellow-500' />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-sm">Tasks (Disabled)</p>
+                                            <p className="font-medium text-sm">Wait/Delay</p>
                                         </div>
                                     </CardContent>
                                 </Card>
                             </div>
                         )}
 
-                        {step === 2 && (
+
+                        {step === 2 && selectedBlock === "cold-email" && (
                             <div className="grid gap-4 py-4 w-full">
                                 <Label htmlFor="template">Select Template</Label>
                                 <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
@@ -250,6 +309,36 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
                             </div>
                         )}
 
+                        {step === 2 && selectedBlock === "wait-delay" && (
+                            <div className="grid gap-4 py-4 w-full">
+                                <Label htmlFor="duration">Delay Duration</Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="duration"
+                                        type="number"
+                                        min={1}
+                                        value={delayDuration}
+                                        onChange={(e) => setDelayDuration(e.target.value)}
+                                        className="w-full"
+                                        placeholder="Enter delay"
+                                    />
+                                    <Select
+                                        value={delayUnit}
+                                        onValueChange={(value) => setDelayUnit(value)}
+                                    >
+                                        <SelectTrigger className="w-32">
+                                            <SelectValue placeholder="Unit" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="minutes">Minutes</SelectItem>
+                                            <SelectItem value="hours">Hours</SelectItem>
+                                            <SelectItem value="days">Days</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        )}
+
                         <DialogFooter>
                             {step === 1 ? (
                                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -260,14 +349,18 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
                                     <Button variant="outline" onClick={() => setStep(1)}>
                                         Back
                                     </Button>
-                                    <Button disabled={!selectedTemplate} onClick={handleAction}>
+                                    <Button disabled={
+                                        (selectedBlock === "cold-email" && !selectedTemplate) ||
+                                        (selectedBlock === "wait-delay" && (!delayDuration || !delayUnit))
+                                    }
+                                        onClick={handleAction}>
                                         Insert
                                     </Button>
                                 </>
                             )}
                         </DialogFooter>
                     </DialogContent>
-                </Dialog>
+                </Dialog >
             </>
         );
     }
@@ -280,21 +373,24 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
                 onClick={() => setIsDialogOpen(true)}
             >
                 <div className="flex items-start">
-                    <div className="mr-3 bg-blue-100 p-2 rounded-lg">
-                        <Mail className='w-8 h-8 text-blue-500' />
-                    </div>
+                    {data.blockType === "wait-delay" ? (
+                        <div className="mr-3 bg-yellow-100 p-2 rounded-lg">
+                            <Clock className="w-8 h-8 text-yellow-500" />
+                        </div>
+                    ) : (
+                        <div className="mr-3 bg-blue-100 p-2 rounded-lg">
+                            <Mail className="w-8 h-8 text-blue-500" />
+                        </div>
+                    )}
                     <div>
                         <p className="font-medium text-sm capitalize">
                             {data.label || data.blockType}
                         </p>
                         <p className="text-blue-500 text-sm">
-                            {data.templateName}
+                            {data.blockType === "wait-delay"
+                                ? `${data.duration || ''} ${data.durationUnit || 'minutes'}`
+                                : data.templateName}
                         </p>
-                        {data.description && (
-                            <p className="text-gray-500 text-xs">
-                                {data.description}
-                            </p>
-                        )}
                     </div>
                 </div>
             </div>
@@ -312,18 +408,58 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
-                        <Label htmlFor="templateSelect">Select template</Label>
-                        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                            <SelectTrigger className='w-full'>
-                                <SelectValue placeholder="Choose a template" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Sample template">Sample Template</SelectItem>
-                                <SelectItem value="Campaign Leads">Campaign Leads</SelectItem>
-                                <SelectItem value="Newsletter Subscribers">Newsletter Subscribers</SelectItem>
-                                <SelectItem value="Recent Customers">Recent Customers</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        {data.blockType === "cold-email" && (
+                            <>
+                                <Label htmlFor="templateSelect">Select template</Label>
+                                <Select
+                                    value={selectedTemplate}
+                                    onValueChange={setSelectedTemplate}
+                                >
+                                    <SelectTrigger className='w-full'>
+                                        <SelectValue placeholder="Choose a template" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Sample template">Sample Template</SelectItem>
+                                        <SelectItem value="Campaign Leads">Campaign Leads</SelectItem>
+                                        <SelectItem value="Newsletter Subscribers">Newsletter Subscribers</SelectItem>
+                                        <SelectItem value="Recent Customers">Recent Customers</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </>
+                        )}
+
+                        {data.blockType === "wait-delay" && (
+                            <>
+                                <div>
+                                    <Label>Delay Duration</Label>
+                                    <Input
+                                        type="number"
+                                        min={1}
+                                        value={delayDuration}
+                                        onChange={(e) => setDelayDuration(e.target.value)}
+                                        className="w-full mt-1"
+                                        placeholder="Enter number"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Delay Unit</Label>
+                                    <Select
+                                        value={delayUnit}
+                                        onValueChange={(value) => setDelayUnit(value)}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Unit" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="minutes">Minutes</SelectItem>
+                                            <SelectItem value="hours">Hours</SelectItem>
+                                            <SelectItem value="days">Days</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <DialogFooter>
@@ -331,7 +467,10 @@ export function BlockNode({ data, id }: UnifiedBLockNodeProps) {
                             Cancel
                         </Button>
                         <Button
-                            disabled={!selectedTemplate}
+                            disabled={
+                                (data.blockType === "cold-email" && !selectedTemplate) ||
+                                (data.blockType === "wait-delay" && !delayDuration)
+                            }
                             onClick={handleAction}
                         >
                             Save Changes
