@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { AlignJustify, X, User, Lightbulb } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem
-} from '@/components/ui/dropdown-menu'
+import { AlignJustify, X, Lightbulb, LogOut } from 'lucide-react'
+import { Button } from './ui/button'
+import { authService } from '@/services/auth-service'
+import { useNavigate } from '@tanstack/react-router'
 
 export default function Navbar() {
 
+    const navigate = useNavigate()
     const [mobileOpen, setMobileOpen] = useState(false)
+
+    const handleLogout = async () => {
+        await authService.logout()
+        navigate({ to: "/login" })
+    }
 
     return (
         <header className="bg-white border-b border-muted-200 shadow-sm w-full">
@@ -21,23 +22,6 @@ export default function Navbar() {
                     {/* Left: Logo & Nav */}
                     <div className="flex items-center space-x-2">
                         <Lightbulb className="w-6 h-6 text-primary" />
-                        {/* <nav className="hidden sm:flex items-center space-x-4">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.key}
-                                    to={item.href}
-                                    className="[&.active]:font-bold"
-                                // className={({ isActive }) =>
-                                //     `px-3 py-2 text-sm font-medium transition-all duration-200 ${isActive
-                                //         ? 'text-sidebar-primary bg-sidebar-primary-foreground rounded-md' // More prominent active state
-                                //         : 'text-muted-foreground hover:text-primary'
-                                //     }`
-                                // }
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
-                        </nav> */}
                     </div>
 
                     {/* Right: Mobile toggle & User */}
@@ -52,20 +36,10 @@ export default function Navbar() {
                             </Button>
                         </div>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="rounded-full border border-muted-300"
-                                >
-                                    <User className="w-5 h-5" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40">
-                                <DropdownMenuItem >Logout</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button variant={"outline"} onClick={handleLogout}>
+                            <LogOut className='w-4 h-4 text-red-500' />
+                            <span className='text-red-500 text-sm'>Logout</span>
+                        </Button>
                     </div>
                 </div>
             </div>

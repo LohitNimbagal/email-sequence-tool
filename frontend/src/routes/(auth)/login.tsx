@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { toast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -40,7 +41,11 @@ function Login() {
       navigate({ to: '/dashboard' });
     } catch (err) {
       console.error(err);
-      form.setError('email', { message: 'Login failed. Please check your credentials.' });
+      toast({
+        variant: "destructive",
+        title: "Something went wrong",
+        description: "Login failed. Please check your credentials."
+      })
     }
   };
 
@@ -77,7 +82,7 @@ function Login() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" placeholder='********' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -92,7 +97,7 @@ function Login() {
 
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
-            <Link to="/register" className="underline underline-offset-4">
+            <Link to="/register" className="text-blue-600 hover:underline hover:underline-offset-4">
               Register
             </Link>
           </div>

@@ -98,4 +98,17 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         res.status(400).json({ message: 'Error getting current user' }).end();
         return
     }
-}
+};
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+        // Clear the session token
+        res.clearCookie('FUTURE-BLINK');
+        
+        res.status(200).json({ message: "Logged out successfully" });
+        return
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({ error: "Error logging out" });
+    }
+};

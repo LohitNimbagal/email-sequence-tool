@@ -1,7 +1,22 @@
 import Navbar from '@/components/nav-bar'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { authService } from '@/services/auth-service'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/(protected)')({
+  beforeLoad: async ({ location }) => {
+    const user = await authService.getCurrentUser()
+    if (!user) {
+      throw redirect({
+        to: '/login',
+        search: {
+          // Use the current location to power a redirect after login
+          // (Do not use `router.state.resolvedLocation` as it can
+          // potentially lag behind the actual current location)
+          redirect: location.href,
+        },
+      })
+    }
+  },
   component: RouteComponent,
 })
 

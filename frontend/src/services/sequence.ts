@@ -6,6 +6,8 @@ export interface Sequence {
     name: string;
     status?: string;
     scheduleTime?: string;
+    updatedAt: Date,
+    createdAt: Date,
     nodes: Node[]
     edges: Edge[]
 }

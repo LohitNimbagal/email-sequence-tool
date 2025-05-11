@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,9 +33,12 @@ function Register() {
     mode: 'onChange'
   })
 
+  const navigate = useNavigate()
+
   const onSubmit = async (values: RegisterSchema) => {
     try {
       await authService.register(values)
+      navigate({ to: "/login" })
     } catch (err: unknown) {
       console.log(err);
       toast({

@@ -132,9 +132,6 @@ interface SequenceCardProps {
 
 function SequenceCard({ sequence, onClick }: SequenceCardProps) {
 
-    const createdAt = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
-    const updatedAt = new Date(createdAt.getTime() + Math.random() * 10 * 24 * 60 * 60 * 1000)
-
     return (
         <div
             className="bg-white rounded-lg shadow-sm border border-gray-100 p-5 hover:shadow transition-all duration-200 cursor-pointer"
@@ -162,12 +159,12 @@ function SequenceCard({ sequence, onClick }: SequenceCardProps) {
 
                 <div className="flex items-center text-gray-500">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span>Created: {format(createdAt, 'MMM d, yyyy')}</span>
+                    <span>Created: {format(sequence.createdAt, 'MMM d, yyyy')}</span>
                 </div>
 
                 <div className="flex items-center text-gray-500">
                     <Clock className="h-4 w-4 mr-2" />
-                    <span>Updated: {format(updatedAt, 'MMM d, yyyy')}</span>
+                    <span>Updated: {format(sequence.updatedAt, 'MMM d, yyyy')}</span>
                 </div>
             </div>
         </div>

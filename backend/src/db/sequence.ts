@@ -46,11 +46,8 @@ const SequenceSchema = new mongoose.Schema({
         source: { type: String, required: true },
         target: { type: String, required: true },
         type: { type: String, required: true }
-    }],
-
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
-});
+    }]
+}, { timestamps: true }); // <-- Automatically adds createdAt and updatedAt
 
 export const SequenceModel = mongoose.model('Sequence', SequenceSchema);
 
