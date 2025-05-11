@@ -51,7 +51,6 @@ export default function Flow({ nodes, edges, setNodes, setEdges }: FlowProps) {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
-                // fitView
             >
                 <Background color="#f8f9fa" gap={16} />
                 <Controls showInteractive={false} />
