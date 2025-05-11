@@ -14,7 +14,7 @@ export interface Sequence {
 
 export const fetchSequences = async (): Promise<Sequence[]> => {
     try {
-        const response = await fetch('http://localhost:8080/api/sequences', {
+        const response = await fetch(`${process.env.SERVER_BASE_URI}/api/sequences`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const fetchSequences = async (): Promise<Sequence[]> => {
 
 export const fetchSequence = async (sequenceId: string): Promise<Sequence> => {
     try {
-        const response = await fetch(`http://localhost:8080/api/sequences/${sequenceId}`, {
+        const response = await fetch(`${process.env.SERVER_BASE_URI}/api/sequences/${sequenceId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export const fetchSequence = async (sequenceId: string): Promise<Sequence> => {
 };
 
 export const createSequence = async (name: string): Promise<Sequence> => {
-    const response = await fetch('http://localhost:8080/api/sequences', {
+    const response = await fetch('${process.env.SERVER_BASE_URI}/api/sequences', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const sequenceQueryOptions = (sequenceId: string) => queryOptions({
 })
 
 export const saveSquence = async ({ nodes, edges, sequenceId, name }: { nodes: Node[], edges: Edge[], sequenceId: string, name: string }) => {
-    const response = await fetch(`http://localhost:8080/api/sequences/${sequenceId}`, {
+    const response = await fetch(`${process.env.SERVER_BASE_URI}/api/sequences/${sequenceId}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',

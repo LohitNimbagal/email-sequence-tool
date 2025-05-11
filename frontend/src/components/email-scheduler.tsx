@@ -25,7 +25,7 @@ type EmailFormData = z.infer<typeof emailSchema>
 
 const sendEmail = async (data: EmailFormData & { scheduleDateTime?: string }) => {
 
-    const response = await fetch('http://localhost:8080/email/send', {
+    const response = await fetch(`${process.env.SERVER_BASE_URI}/email/send`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

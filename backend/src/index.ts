@@ -40,6 +40,6 @@ mongoose.connection.on('error', (error) => console.log('MongoDB connection error
 app.use('/api', router());
 
 // Start the server
-server.listen(8080, () => {
-    console.log(`Server running on http://localhost:8080`);
+server.listen(process.env.PORT, () => {
+    console.log(`Server running on http://localhost:${process.env.PORT}`);
 });

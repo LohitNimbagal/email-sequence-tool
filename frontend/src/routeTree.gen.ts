@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as protectedRouteImport } from './routes/(protected)/route'
+import { Route as RouteImport } from './routes/route'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as protectedDashboardIndexImport } from './routes/(protected)/dashboard/index'
@@ -22,6 +23,12 @@ import { Route as protectedDashboardSequencesSequenceIdIndexImport } from './rou
 
 const protectedRouteRoute = protectedRouteImport.update({
   id: '/(protected)',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const RouteRoute = RouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -61,6 +68,13 @@ const protectedDashboardSequencesSequenceIdIndexRoute =
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof RouteImport
+      parentRoute: typeof rootRoute
+    }
     '/(protected)': {
       id: '/(protected)'
       path: '/'
@@ -145,6 +159,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/': typeof RouteRoute
   '/(protected)': typeof protectedRouteRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
@@ -172,6 +187,7 @@ export interface FileRouteTypes {
     | '/dashboard/sequences/$sequenceId'
   id:
     | '__root__'
+    | '/'
     | '/(protected)'
     | '/(auth)/login'
     | '/(auth)/register'
@@ -182,12 +198,14 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
+  RouteRoute: typeof RouteRoute
   protectedRouteRoute: typeof protectedRouteRouteWithChildren
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  RouteRoute: RouteRoute,
   protectedRouteRoute: protectedRouteRouteWithChildren,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
@@ -203,10 +221,14 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/",
         "/(protected)",
         "/(auth)/login",
         "/(auth)/register"
       ]
+    },
+    "/": {
+      "filePath": "route.tsx"
     },
     "/(protected)": {
       "filePath": "(protected)/route.tsx",

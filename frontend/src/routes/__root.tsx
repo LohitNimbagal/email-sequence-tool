@@ -4,8 +4,10 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
     component: () => (
-        <div className='font-inter'>
-            <Outlet />
+        <div className='font-inter flex items-center justify-center'>
+            <div className='w-full max-w-7xl'>
+                <Outlet />
+            </div>
         </div>
     ),
 })
