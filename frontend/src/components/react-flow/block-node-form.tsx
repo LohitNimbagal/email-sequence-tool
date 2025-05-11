@@ -32,14 +32,18 @@ import {
 } from "@/components/ui/form"
 import { useState } from "react";
 import { formSchema, type FormSchemaType } from "@/lib/zod-schemas";
+import { handleAdd, handleEdit } from "@/services/flow";
+import { useReactFlow } from "@xyflow/react";
 
 interface BlockNodeDialogProps {
+    id: string,
     isAdder: boolean;
-    handleSubmit: (values: FormSchemaType) => void;
     defaultValues?: FormSchemaType;
 }
 
-export default function BlockNodeDialog({ isAdder, handleSubmit, defaultValues }: BlockNodeDialogProps) {
+export default function BlockNodeForm({ isAdder, defaultValues, id }: BlockNodeDialogProps) {
+
+    const reactFlow = useReactFlow();
 
     const [open, setOpen] = useState(false)
     const [step, setStep] = useState(1)
@@ -54,9 +58,13 @@ export default function BlockNodeDialog({ isAdder, handleSubmit, defaultValues }
         },
     })
 
-    const onSubmit = (values: FormSchemaType) => {
-        handleSubmit(values);
-        setOpen(false);
+    const handleSubmit = (values: FormSchemaType) => {
+        if (isAdder) {
+            handleAdd(reactFlow, values)
+        } else {
+            handleEdit(reactFlow, values, id)
+        }
+        form.reset()
     }
 
     const handleBlockSelect = (type: "cold-email" | "wait-delay") => {
@@ -112,7 +120,7 @@ export default function BlockNodeDialog({ isAdder, handleSubmit, defaultValues }
                 </DialogHeader>
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <form onSubmit={form.handleSubmit(handleSubmit)}>
                         {step === 1 && (
                             <div className="grid grid-cols-2 gap-4 py-4">
                                 <Card
@@ -160,7 +168,7 @@ export default function BlockNodeDialog({ isAdder, handleSubmit, defaultValues }
                                         <FormLabel>Select Template</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Choose a template" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -184,7 +192,7 @@ export default function BlockNodeDialog({ isAdder, handleSubmit, defaultValues }
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Delay Duration</FormLabel>
-                                            <div className="flex gap-2">
+                                            <div className="grid grid-cols-2 gap-2">
                                                 <FormControl>
                                                     <Input
                                                         type="number"
@@ -199,7 +207,7 @@ export default function BlockNodeDialog({ isAdder, handleSubmit, defaultValues }
                                                     render={({ field }) => (
                                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                             <FormControl>
-                                                                <SelectTrigger className="w-32">
+                                                                <SelectTrigger className="w-full">
                                                                     <SelectValue placeholder="Unit" />
                                                                 </SelectTrigger>
                                                             </FormControl>

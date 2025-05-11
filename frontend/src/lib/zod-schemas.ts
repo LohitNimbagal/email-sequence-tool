@@ -8,3 +8,10 @@ export const formSchema = z.object({
 })
 
 export type FormSchemaType = z.infer<typeof formSchema>;
+
+export const sourceFormSchema = z.object({
+    sourceType: z.enum(["list"]),
+    listName: z.string().min(1, "Please select a list"),
+})
+
+export type SourceFormValues = z.infer<typeof sourceFormSchema>

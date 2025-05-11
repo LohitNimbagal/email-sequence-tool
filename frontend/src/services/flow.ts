@@ -1,5 +1,5 @@
 
-import { type FormSchemaType } from '@/lib/zod-schemas';
+import { type FormSchemaType, type SourceFormValues } from '@/lib/zod-schemas';
 import { type Node, type Edge, type ReactFlowInstance } from '@xyflow/react';
 import { nanoid } from "nanoid";
 
@@ -58,9 +58,6 @@ export const handleAdd = (reactFlow: ReactFlowInstance, values: FormSchemaType):
         label: blockType === "cold-email" ? "Cold Email" : "Wait / Delay",
     };
 
-    console.log("blockData:", blockData);
-
-
     if (blockType === "cold-email") {
         if (!emailTemplate) return;
         blockData.templateName = emailTemplate;
@@ -76,8 +73,6 @@ export const handleAdd = (reactFlow: ReactFlowInstance, values: FormSchemaType):
         position: { x: xPosition, y: yPosition },
         data: blockData,
     };
-
-    console.log("New BLock", newBlockNode);
 
     reactFlow.addNodes(newBlockNode);
 
@@ -132,7 +127,6 @@ export const handleAdd = (reactFlow: ReactFlowInstance, values: FormSchemaType):
     reactFlow.setEdges(cleanedEdges);
 }
 
-
 export const handleEdit = (reactFlow: ReactFlowInstance, values: FormSchemaType, id: string): void => {
 
     if (values.blockType === "cold-email") {
@@ -170,4 +164,84 @@ export const handleEdit = (reactFlow: ReactFlowInstance, values: FormSchemaType,
             })
         );
     }
+}
+
+export const handleAddSource = (reactFlow: ReactFlowInstance, values: SourceFormValues) => {
+
+    if (values.sourceType === "list" && values.listName) {
+        const HORIZONTAL_SPACING = 250;
+        const START_Y = 300;
+        const existingNodes = reactFlow.getNodes();
+        const sourceNodes = existingNodes.filter(node =>
+            node.type === 'sourceNode' && !node.data.isAdder);
+
+        // Calculate X position for the new node
+        let xPosition;
+
+        if (sourceNodes.length > 0) {
+            // Find the rightmost existing source node
+            const rightmostNodeX = sourceNodes.reduce(
+                (max, node) => Math.max(max, node.position.x),
+                -Infinity
+            );
+            xPosition = rightmostNodeX + HORIZONTAL_SPACING;
+        } else {
+            // First source node — place to the right of node '1'
+            const startNode = existingNodes.find(node => node.id === 'node-sequence-starting-point');
+            xPosition = startNode ? startNode.position.x + HORIZONTAL_SPACING : 300;
+        }
+
+        const newNode = {
+            id: `node-${nanoid()}`,
+            type: 'sourceNode',
+            position: { x: xPosition, y: START_Y },
+            data: {
+                isAdder: false,
+                label: "Leads from",
+                sourceType: values.sourceType,
+                listName: values.listName,
+                subtitle: values.listName,
+            },
+        };
+
+        // Create a new edge to connect the new source node to the sequence start point (id: '1')
+        const newEdge = {
+            id: `edge-${nanoid()}`,
+            source: newNode.id,
+            target: 'node-sequence-starting-point', // Connect to the sequence start point
+            type: 'default',
+        };
+
+        reactFlow.addNodes(newNode);
+        reactFlow.addEdges(newEdge);
+
+        const addBlockNode = existingNodes.find(node => node.id === 'add-block');
+        if (addBlockNode) {
+            reactFlow.addEdges({
+                id: `edge-${nanoid()}`,
+                source: 'node-sequence-starting-point',
+                target: addBlockNode.id,
+                type: 'default',
+            });
+        }
+    }
+}
+
+export const handleEditSource = (reactFlow: ReactFlowInstance, values: SourceFormValues, id: string) => {
+
+    reactFlow.setNodes((nodes) =>
+        nodes.map((node) => {
+            if (node.id === id) {
+                return {
+                    ...node,
+                    data: {
+                        ...values,
+                        listName: values.listName,
+                        subtitle: values.listName,
+                    }
+                };
+            }
+            return node;
+        })
+    );
 }
