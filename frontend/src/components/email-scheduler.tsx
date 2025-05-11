@@ -25,13 +25,12 @@ type EmailFormData = z.infer<typeof emailSchema>
 
 const sendEmail = async (data: EmailFormData & { scheduleDateTime?: string }) => {
 
-    console.log(data);
-
     const response = await fetch('http://localhost:8080/email/send', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: "include",
         body: JSON.stringify(data),
     })
 

@@ -9,7 +9,7 @@ const DEFAULT_HEADERS = {
 
 export const authService = {
     login: async (credentials: { email: string; password: string }, redirectUrl: string = '/') => {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
             method: 'POST',
             headers: DEFAULT_HEADERS,
             body: JSON.stringify(credentials),
@@ -26,7 +26,7 @@ export const authService = {
     },
     
     register: async (userData: { username: string; email: string; password: string }) => {
-        const response = await fetch(`${API_URL}/auth/register`, {
+        const response = await fetch(`${API_URL}/api/auth/register`, {
             method: 'POST',
             headers: DEFAULT_HEADERS,
             body: JSON.stringify(userData),
@@ -42,7 +42,7 @@ export const authService = {
     },
 
     logout: async () => {
-        await fetch(`${API_URL}/auth/logout`, {
+        await fetch(`${API_URL}/api/auth/logout`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -50,7 +50,7 @@ export const authService = {
 
     getCurrentUser: async (): Promise<User | null> => {
         try {
-            const response = await fetch(`${API_URL}/auth/current`, {
+            const response = await fetch(`${API_URL}/api/auth/current`, {
                 headers: DEFAULT_HEADERS,
                 credentials: 'include',
                 mode: 'cors'

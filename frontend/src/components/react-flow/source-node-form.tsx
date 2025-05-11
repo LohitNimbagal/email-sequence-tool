@@ -32,6 +32,7 @@ export default function SourceNodeForm({ isAdder, defaultValues, data, id }: Sor
 
     const reactFlow = useReactFlow();
     const [step, setStep] = useState(1)
+    const [open, setOpen] = useState(false)
 
     const form = useForm<SourceFormValues>({
         resolver: zodResolver(sourceFormSchema),
@@ -42,20 +43,17 @@ export default function SourceNodeForm({ isAdder, defaultValues, data, id }: Sor
     })
 
     const onSubmit = (values: SourceFormValues) => {
-        handleSubmit(values)
-    }
-
-    const handleSubmit = (values: SourceFormValues) => {
         if (isAdder) {
             handleAddSource(reactFlow, values)
         } else {
             handleEditSource(reactFlow, values, id)
         }
+        setOpen(false)
         form.reset()
     }
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
                 {isAdder ? (
                     <div
@@ -195,15 +193,13 @@ export default function SourceNodeForm({ isAdder, defaultValues, data, id }: Sor
                             <Button type="button" variant="outline" onClick={() => setStep(1)}>
                                 Back
                             </Button>
-                            <DialogClose asChild>
-                                <Button type="submit">
-                                    {isAdder ? "Insert" : "Save Changes"}
-                                </Button>
-                            </DialogClose>
+                            <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+                                {isAdder ? "Insert" : "Save Changes"}
+                            </Button>
                         </>
                     )}
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }

@@ -37,7 +37,7 @@ mongoose.connect(process.env.ATLAS_URI!)
 mongoose.connection.on('error', (error) => console.log('MongoDB connection error:', error));
 
 // Routes
-app.use('/', router());
+app.use('/api', router());
 
 // Start the server
 server.listen(8080, () => {

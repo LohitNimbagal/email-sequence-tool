@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createSequence, sequencesQueryOptions, type Sequence } from '@/services/sequence'
 import { Search, LayoutGrid, Plus, Calendar, Clock, Edit } from "lucide-react"
-
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 import {
     Dialog,
     DialogContent,
@@ -15,7 +16,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { useState, type FormEvent } from 'react'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { useState } from 'react'
 import { format } from 'date-fns'
 import EmailScheduler from '@/components/email-scheduler'
 
@@ -26,20 +35,28 @@ export const Route = createFileRoute('/(protected)/dashboard/')({
     component: Dashboard,
 })
 
-function NewSequenceDialog() {
+const formSchema = z.object({
+    sequenceName: z.string().min(1, "Sequence name is required"),
+})
 
+function NewSequenceDialog() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-
     const [open, setOpen] = useState<boolean>(false)
-    const [sequenceName, setSequenceName] = useState<string>("")
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            sequenceName: "",
+        },
+    })
 
     const createSequenceMutation = useMutation({
         mutationFn: createSequence,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['sequences'] })
             navigate({ to: '/dashboard/sequences/$sequenceId', params: { sequenceId: data._id } })
-            setSequenceName("")
+            form.reset()
             setOpen(false)
         },
         onError: (error) => {
@@ -47,9 +64,8 @@ function NewSequenceDialog() {
         },
     })
 
-    const handleCreateSequence = (e: FormEvent) => {
-        e.preventDefault()
-        createSequenceMutation.mutate(sequenceName)
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        createSequenceMutation.mutate(values.sequenceName)
     }
 
     return (
@@ -65,40 +81,45 @@ function NewSequenceDialog() {
                     <DialogTitle>Create New Sequence</DialogTitle>
                     <DialogDescription>Set up a new email sequence for your campaign.</DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleCreateSequence}>
-                    <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="sequenceName" className="text-sm font-medium text-gray-700">
-                                Sequence Name
-                            </Label>
-                            <Input
-                                id="sequenceName"
-                                value={sequenceName}
-                                onChange={(e) => setSequenceName(e.target.value)}
-                                placeholder="Enter sequence name"
-                                className="w-full border-gray-200 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="sequenceName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Sequence Name</FormLabel>
+                                    <FormControl>
+                                        <Input 
+                                            placeholder="Enter sequence name" 
+                                            {...field}
+                                            className="w-full border-gray-200 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                            disabled={createSequenceMutation.isPending}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <DialogFooter className="gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setOpen(false)}
+                                className="border-gray-200 hover:bg-gray-50"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
                                 disabled={createSequenceMutation.isPending}
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter className="gap-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpen(false)}
-                            className="border-gray-200 hover:bg-gray-50"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                            disabled={createSequenceMutation.isPending || !sequenceName.trim()}
-                        >
-                            {createSequenceMutation.isPending ? "Creating..." : "Create Sequence"}
-                        </Button>
-                    </DialogFooter>
-                </form>
+                            >
+                                {createSequenceMutation.isPending ? "Creating..." : "Create Sequence"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
