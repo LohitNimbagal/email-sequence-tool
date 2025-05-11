@@ -12,7 +12,7 @@ const app = express();
 
 // Apply CORS middleware before defining routes
 app.use(cors({
-    origin: process.env.CLIENT_URI,
+    origin: process.env.CLIENT_URI || "https://emailsequence.vercel.app/",
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization']
@@ -25,9 +25,6 @@ app.use(bodyParser.json());
 
 // Create server
 const server = http.createServer(app);
-
-// Database connection
-// const ATLAS_URI = "mongodb+srv://nimbagallohit:XH9hdskBwInlPNOl@cluster0.iucjdul.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.Promise = Promise;
 mongoose.connect(process.env.ATLAS_URI!)
