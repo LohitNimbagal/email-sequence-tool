@@ -23,9 +23,17 @@
                 "PATCH",
                 "OPTIONS"
             ],
-            "headers": {
-                "Access-Control-Allow-Origin": "*"
-            }
+            "headers": [
+                {
+                    "source": "https://emailsequence.vercel.app/*",
+                    "headers": [
+                        {
+                            "key": "Access-Control-Allow-Origin",
+                            "value": "*"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
