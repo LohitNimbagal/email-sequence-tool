@@ -36,7 +36,6 @@ mongoose.connection.on('error', (error) => console.log('MongoDB connection error
 
 
 // Routes
-app.options('/api', cors())
 app.use('/api', router());
 
 // Start the server
