@@ -16,7 +16,7 @@ app.use(cors({
     credentials: true, // Allow credentials (cookies)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allowed methods
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'], // Allowed headers
-    // preflightContinue: true,
+    preflightContinue: true,
     optionsSuccessStatus: 200
 }));
 
