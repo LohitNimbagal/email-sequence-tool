@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon",
-    "build": "nodemon",
-    "dev": "nodemon ./src/index.ts"
+    "dev": "nodemon ./src/index.ts",
+    "vercel-bluid": "echo hello"
   },
   "keywords": [],
   "author": "",

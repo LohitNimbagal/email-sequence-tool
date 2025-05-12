@@ -10,7 +10,6 @@ import "dotenv/config";
 
 const app = express();
 
-
 // CORS middleware for all routes
 app.use(cors({
     origin: process.env.CLIENT_URI || "https://emailsequence.vercel.app", // Allow only your frontend
@@ -42,3 +41,5 @@ app.use('/api', router());
 server.listen(process.env.PORT, () => {
     console.log(`Server running on http://localhost:${process.env.PORT}`);
 });
+
+export default app
