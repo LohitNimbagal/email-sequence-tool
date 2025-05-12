@@ -17,7 +17,7 @@
                 },
                 {
                     "key": "Access-Control-Allow-Origin",
-                    "value": "true"
+                    "value": "https://emailsequence.vercel.app"
                 },
                 {
                     "key": "Access-Control-Allow-Methods",
