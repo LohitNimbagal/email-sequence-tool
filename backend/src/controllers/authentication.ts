@@ -36,9 +36,7 @@ export const login = async (req: Request, res: Response) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'none',
-            domain: process.env.DOMAIN
         });
-
 
         res.status(200).json(user);
     } catch (error) {
