@@ -18,15 +18,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'], // Allowed headers
 }));
 
-// Handle preflight (OPTIONS) requests explicitly
-app.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', process.env.CLIENT_URI || "https://emailsequence.vercel.app");
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-    res.sendStatus(200); // Ensure OPTIONS gets a 200 OK
-});
-
 // Other middleware
 app.use(compression());
 app.use(cookieParser());
