@@ -1,4 +1,4 @@
-{   
+{
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "installCommand": "npm install --legacy-peer-deps",
     "headers": [
@@ -20,6 +20,15 @@
                 {
                     "key": "Access-Control-Allow-Headers",
                     "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+                }
+            ]
+        },
+        {
+            "source": "https://emailsequence.vercel.app/(.*)",
+            "headers": [
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
                 }
             ]
         }
