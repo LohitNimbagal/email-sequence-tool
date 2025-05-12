@@ -32,9 +32,12 @@ export const login = async (req: Request, res: Response) => {
         await user.save();
 
         res.cookie('FUTURE-BLINK', user.authentication.sessionToken, {
-            domain: process.env.CLIENT_URI,
-            path: '/',
+            path: '/',           
+            httpOnly: true,      
+            secure: false,       
+            sameSite: 'lax',
         });
+
 
         res.status(200).json(user);
     } catch (error) {
@@ -105,7 +108,7 @@ export const logout = async (req: Request, res: Response) => {
     try {
         // Clear the session token
         res.clearCookie('FUTURE-BLINK');
-        
+
         res.status(200).json({ message: "Logged out successfully" });
         return
     } catch (error) {
