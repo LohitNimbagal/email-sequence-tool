@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Calendar, ExternalLink, Github, ListOrdered, LogIn, Mail, Terminal, UserPlus } from 'lucide-react'
+import { Calendar, ExternalLink, Github, ListOrdered, LogIn, Mail, UserPlus } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
@@ -99,82 +99,6 @@ function RouteComponent() {
                   <Link to="/login">
                     Get Started
                   </Link>
-                </Button>
-              </div>
-            </div>
-
-            {/* How to run locally */}
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <h2 className="mb-6 text-2xl font-semibold">Run Locally</h2>
-
-              <div className="space-y-6">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Terminal className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">1. Clone the repository</h3>
-                    <div className="mt-2 rounded-md bg-muted p-2">
-                      <code className="text-xs">git clone https://github.com/LohitNimbagal/email-sequence-tool</code>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Terminal className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">2. Install dependencies</h3>
-                    <div className="mt-2 rounded-md bg-muted p-2">
-                      <code className="text-xs">
-                        cd email-sequence
-                        <br />
-                        npm install
-                      </code>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Terminal className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">3. Set up environment variables</h3>
-                    <div className="mt-2 rounded-md bg-muted p-2">
-                      <code className="text-xs">
-                        cp .env.example .env.local
-                        <br />
-                        nano .env.local
-                      </code>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Terminal className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">4. Start the development server</h3>
-                    <div className="mt-2 rounded-md bg-muted p-2">
-                      <code className="text-xs">npm run dev</code>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <Button asChild variant="outline" className="w-full">
-                  <a
-                    href="https://github.com/LohitNimbagal/email-sequence-tool"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="mr-2 h-4 w-4" />
-                    View on GitHub
-                  </a>
                 </Button>
               </div>
             </div>

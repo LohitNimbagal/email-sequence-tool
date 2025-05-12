@@ -15,7 +15,7 @@ export default function Navbar() {
     }
 
     return (
-        <header className="bg-white border-b border-muted-200 shadow-sm w-full">
+        <header className="border-b border-muted-200 w-full">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 items-center justify-between">
 
