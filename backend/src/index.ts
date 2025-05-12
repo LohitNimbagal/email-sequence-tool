@@ -11,7 +11,7 @@ import "dotenv/config"
 const app = express();
 
 // Apply CORS middleware before defining routes
-app.use(cors({
+app.use('*', cors({
     origin: process.env.CLIENT_URI || "https://emailsequence.vercel.app",
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
