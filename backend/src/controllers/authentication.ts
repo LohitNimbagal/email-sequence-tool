@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { authentication, random } from "../helpers";
 import { createUser, getUserByEmail, getUserBySessionToken } from "../db/users";
+import "dotenv/config"
 
 export const login = async (req: Request, res: Response) => {
     try {
@@ -31,7 +32,7 @@ export const login = async (req: Request, res: Response) => {
         await user.save();
 
         res.cookie('FUTURE-BLINK', user.authentication.sessionToken, {
-            domain: 'localhost',
+            domain: process.env.CLIENT_URI,
             path: '/',
         });
 
