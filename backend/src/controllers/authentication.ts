@@ -32,10 +32,11 @@ export const login = async (req: Request, res: Response) => {
         await user.save();
 
         res.cookie('FUTURE-BLINK', user.authentication.sessionToken, {
-            path: '/',           
-            httpOnly: true,      
-            secure: false,       
-            sameSite: 'lax',
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+            domain: process.env.DOMAIN
         });
 
 
