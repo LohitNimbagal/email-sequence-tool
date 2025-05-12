@@ -9,22 +9,6 @@ interface NodeData {
     [key: string]: any;
 }
 
-interface Node {
-    id: string;
-    position: Position;
-    type?: string;
-    data: NodeData;
-    style?: Record<string, any>;
-    measured?: Record<string, any>;
-}
-
-interface Edge {
-    id: string;
-    source: string;
-    target: string;
-    type: string;
-}
-
 const SequenceSchema = new mongoose.Schema({
     name: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
