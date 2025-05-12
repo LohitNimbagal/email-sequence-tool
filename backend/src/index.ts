@@ -10,17 +10,14 @@ import "dotenv/config";
 
 const app = express();
 
+
 // CORS middleware for all routes
 app.use(cors({
     origin: process.env.CLIENT_URI || "https://emailsequence.vercel.app", // Allow only your frontend
     credentials: true, // Allow credentials (cookies)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allowed methods
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'], // Allowed headers
-    preflightContinue: true,
-    optionsSuccessStatus: 200
 }));
-
-
 
 // Other middleware
 app.use(compression());
@@ -37,7 +34,9 @@ mongoose.connect(process.env.ATLAS_URI!)
 
 mongoose.connection.on('error', (error) => console.log('MongoDB connection error:', error));
 
+
 // Routes
+app.options('/api', cors())
 app.use('/api', router());
 
 // Start the server
